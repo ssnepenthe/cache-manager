@@ -19,40 +19,38 @@ class CacheManager {
 	}
 
 	public function init() {
-		$this->cache = new Cache;
+		$url = home_url();
+
+		// Should probably check action to make sure this belongs to our plugin.
+		// But toolbar object isn't available yet.
+		if ( isset( $_GET['path'] ) ) {
+			$url .= $_GET['path'];
+		} else {
+			$url .= $_SERVER['REQUEST_URI'];
+		}
+		$this->cache = new Cache( $url );
 
 		$classes = [ 'cache-manager-icon' ];
 
-		if ( $this->cache->cache_file_exists() ) {
-			$classes[] = 'cache-file-exists';
+		if ( $this->cache->cache_exists() ) {
+			$classes[] = 'exists';
 		} else {
-			$classes[] = 'cache-file-does-not-exist';
+			$classes[] = 'does-not-exist';
 		}
 
-		$class = implode( ' ', $classes );
+		$this->toolbar = new Toolbar( [
+			'id' => 'cache-manager',
+			'title' => sprintf( 'Cache<div class="%1$s"></div>', implode( ' ', $classes ) ),
+		] );
 
-		$icon = sprintf(
-			'<div class="%1$s"></div>',
-			esc_attr( $class )
-		);
-
-		$args = [
-			'id'     => 'cache-manager',
-			'parent' => false,
-			'title'  => 'Cache Manager ' . $icon,
-		];
-
-		$this->toolbar = new Toolbar( $args );
-
-		$this->add_items();
+		$this->add_nodes();
 
 		$this->public_hooks();
 	}
 
 	public function public_hooks() {
-		add_action( 'wp_head', [ $this->cache, 'cache_timestamp' ] );
-
-		add_action( 'admin_bar_menu', [ $this->toolbar, 'admin_bar_menu' ], 100 );
+		add_action( 'admin_init', [ $this->toolbar, 'admin_init' ] );
+		add_action( 'admin_bar_menu', [ $this->toolbar, 'admin_bar_menu' ], 999 );
 
 		/**
 		 TEMPORARY
@@ -60,14 +58,9 @@ class CacheManager {
 		add_action( 'wp_head', function() {
 			echo '<style>';
 			echo '#wpadminbar .cache-manager-icon { border-radius: 50%; display: inline-block; float: left; height: 12px; margin: 10px 6px 0 0; width: 12px; }';
-
 			echo '#wpadminbar #wp-admin-bar-purge-cache .ab-item { height: auto; padding-bottom: 12px; }';
-			echo '#wp-admin-bar-purge-cache span { height: 18px; }';
-			echo '#wp-admin-bar-purge-cache .age { color: #999; font-size: 11px; }';
-
-			echo '.cache-file-exists { background: green; }';
-			echo '.cache-file-does-not-exist { background: red; }';
-			echo '.purge, .age { display: block; }';
+			echo '.exists { background: green; }';
+			echo '.does-not-exist { background: red; }';
 			echo '</style>';
 		} );
 		/**
@@ -75,27 +68,35 @@ class CacheManager {
 		 */
 	}
 
-	protected function add_items() {
-		$defaults = [];
+	protected function add_nodes() {
+		$this->toolbar->add_node( [
+			'id' => 'refresh-cache',
+			'title' => 'Refresh Cache',
+			'callback' => [ $this->cache, 'refresh_cache' ],
+			'display' => [ $this->cache, 'cache_exists' ],
+		] );
 
-		if ( ! $this->cache->cache_file_exists() ) {
-			$defaults[] = [ 'title' => 'Generate Cache' ];
-		} else {
-			$age = $this->cache->get_cache_file_age();
-			$title = sprintf(
-				'<span class="age">Age: %1$s</span>',
-				$age
-			);
+		$this->toolbar->add_node( [
+			'id' => 'delete-cache',
+			'title' => 'Delete Cache',
+			'callback' => [ $this->cache, 'delete_cache' ],
+			'display' => [ $this->cache, 'cache_exists' ],
+		] );
 
-			$defaults[] = [
-				'href'  => '#',
-				'id'    => 'purge-cache',
-				'title' => '<span class="purge">Purge Cache</span>' . $title,
-			];
-		}
+		$this->toolbar->add_node( [
+			'id' => 'generate-cache',
+			'title' => 'Generate Cache',
+			'callback' => [ $this->cache, 'generate_cache' ],
+			'display' => [ $this->cache, 'not_cache_exists' ],
+		] );
 
-		foreach ( $defaults as $item ) {
-			$this->toolbar->add_item( $item );
-		}
+		$this->toolbar->add_node( [
+			'id' => 'delete-full-cache',
+			'title' => 'Delete All Cache Files',
+			'callback' => 'delete_all_callback', // not real... see below.
+			'display' => '__return_false', // until I decide if I really want this option.
+		] );
+
+		do_action( __NAMESPACE__ . '\\add_nodes', $this->toolbar );
 	}
 }
