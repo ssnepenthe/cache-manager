@@ -7,96 +7,123 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class CacheManager {
-	protected $plugin_name;
-	protected $plugin_version;
+	protected $default_cache_class = null;
+	protected $registered_cache_classes = [];
+	protected $cache_instances = [];
 
-	protected $cache;
-	protected $toolbar;
+	public function __construct() {}
 
-	public function __construct( $name, $version ) {
-		$this->plugin_name = $name;
-		$this->plugin_version = $version;
+	public function add_cache_class( $id, $class ) {
+		if ( ! isset( $this->registered_cache_classes[ $id ] ) ) {
+			$this->registered_cache_classes[ $id ] = $class;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	public function add_cache_classes( array $classes ) {
+		foreach ( $classes as $id => $class ) {
+			if ( ! is_string( $id ) ) {
+				continue;
+			}
+
+			$this->add_cache_class( $id, $class );
+		}
+	}
+
+	public function get_cache_class( $id ) {
+		if ( isset( $this->registered_cache_classes[ $id ] ) ) {
+			return $this->registered_cache_classes[ $id ];
+		}
+
+		return false;
+	}
+
+	public function get_cache_instances( $url = null ) {
+		if ( is_null( $url ) ) {
+			return $this->cache_instances;
+		}
+
+		$url = $this->normalize_url( $url );
+
+		if ( isset( $this->cache_instances[ $url ] ) ) {
+			return $this->cache_instances[ $url ];
+		}
+
+		return false;
+	}
+
+	public function get_default_cache_class() {
+		return $this->default_cache_class;
 	}
 
 	public function init() {
-		$url = home_url();
-
-		// Should probably check action to make sure this belongs to our plugin.
-		// But toolbar object isn't available yet.
-		if ( isset( $_GET['path'] ) ) {
-			$url .= $_GET['path'];
-		} else {
-			$url .= $_SERVER['REQUEST_URI'];
-		}
-		$this->cache = new Cache( $url );
-
-		$classes = [ 'cache-manager-icon' ];
-
-		if ( $this->cache->cache_exists() ) {
-			$classes[] = 'exists';
-		} else {
-			$classes[] = 'does-not-exist';
+		if ( is_null( $this->default_cache_class ) ) {
+			throw new \Exception( 'No default cache class set.' );
 		}
 
-		$this->toolbar = new Toolbar( [
-			'id' => 'cache-manager',
-			'title' => sprintf( 'Cache<div class="%1$s"></div>', implode( ' ', $classes ) ),
-		] );
+		if ( ! $this->get_cache_class( $this->default_cache_class ) ) {
+			throw new \Exception( 'Default cache class does not exist.' );
+		}
 
-		$this->add_nodes();
-
-		$this->public_hooks();
+		$this->create_cache_instance( 'fake' );
 	}
 
-	public function public_hooks() {
-		add_action( 'admin_init', [ $this->toolbar, 'admin_init' ] );
-		add_action( 'admin_bar_menu', [ $this->toolbar, 'admin_bar_menu' ], 999 );
+	public function normalize_url( $url ) {
+		// Needs a lot of work...
+		$parsed_url = parse_url( $url );
 
-		/**
-		 TEMPORARY
-		 */
-		add_action( 'wp_head', function() {
-			echo '<style>';
-			echo '#wpadminbar .cache-manager-icon { border-radius: 50%; display: inline-block; float: left; height: 12px; margin: 10px 6px 0 0; width: 12px; }';
-			echo '#wpadminbar #wp-admin-bar-purge-cache .ab-item { height: auto; padding-bottom: 12px; }';
-			echo '.exists { background: green; }';
-			echo '.does-not-exist { background: red; }';
-			echo '</style>';
-		} );
-		/**
-		 TEMPORARY
-		 */
+		if ( ! $url || ! isset( $parsed_url['scheme'] ) || ! isset( $parsed_url['host'] ) ) {
+			throw new \Exception( 'Malformed URL.' );
+		}
+
+		if ( ! isset( $parsed_url['path'] ) ) {
+			$parsed_url['path'] = '/';
+		}
+
+		return $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'];
 	}
 
-	protected function add_nodes() {
-		$this->toolbar->add_node( [
-			'id' => 'refresh-cache',
-			'title' => 'Refresh Cache',
-			'callback' => [ $this->cache, 'refresh_cache' ],
-			'display' => [ $this->cache, 'cache_exists' ],
-		] );
+	public function remove_cache_classes( $id ) {
+		$r = false;
 
-		$this->toolbar->add_node( [
-			'id' => 'delete-cache',
-			'title' => 'Delete Cache',
-			'callback' => [ $this->cache, 'delete_cache' ],
-			'display' => [ $this->cache, 'cache_exists' ],
-		] );
+		if ( isset( $this->registered_cache_classes[ $id ] ) ) {
+			unset( $this->registered_cache_classes[ $id ] );
 
-		$this->toolbar->add_node( [
-			'id' => 'generate-cache',
-			'title' => 'Generate Cache',
-			'callback' => [ $this->cache, 'generate_cache' ],
-			'display' => [ $this->cache, 'not_cache_exists' ],
-		] );
+			if ( $id === $this->default_cache_class ) {
+				$this->default_cache_class = null;
+			}
 
-		$this->toolbar->add_node( [
-			'id' => 'delete-full-cache',
-			'title' => 'Delete All Cache Files',
-			'callback' => 'delete_all_callback', // not real... see below.
-			'display' => '__return_false', // until I decide if I really want this option.
-		] );
+			$r = true;
+		}
 
-		do_action( __NAMESPACE__ . '\\add_nodes', $this->toolbar );
+		return $r;
+	}
+
+	public function set_default_cache_class( $id ) {
+		if ( isset( $this->registered_cache_classes[ $id ] ) ) {
+			$this->default_cache_class = $id;
+
+			return true;
+		}
+
+		return false;
+	}
+
+	protected function create_cache_instance( $url ) {
+		if (
+			! $this->get_cache_instances( $url ) &&
+			! is_null( $this->default_cache_class ) &&
+			$class = $this->get_cache_class( $this->default_cache_class )
+		) {
+			$url = $this->normalize_url( $url );
+			$this->cache_instances[ $url ] = new $class( $url );
+
+			return true;
+		}
+
+		return false;
 	}
 }
