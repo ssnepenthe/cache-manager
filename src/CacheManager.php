@@ -103,6 +103,8 @@ class CacheManager {
 			 TEMPORARY
 			 */
 		}
+
+		add_action( 'transition_post_status', [ $this, 'transition_post_status' ], 10, 3 );
 	}
 
 	public function normalize_url( $url ) {
@@ -144,6 +146,16 @@ class CacheManager {
 		}
 
 		return false;
+	}
+
+	public function transition_post_status( $new_status, $old_status, $post ) {
+		if ( 'publish' !== $old_status && 'private' !== $old_status ) {
+			return;
+		}
+
+		$url = get_permalink( $post );
+
+		$this->create_cache_instance( $url )->delete();
 	}
 
 	protected function add_toolbar_nodes() {
@@ -188,15 +200,18 @@ class CacheManager {
 	}
 
 	protected function create_cache_instance( $url ) {
+		if ( $instance = $this->get_cache_instances( $url ) ) {
+			return $instance;
+		}
+
 		if (
-			! $this->get_cache_instances( $url ) &&
 			! is_null( $this->default_cache_class ) &&
 			$class = $this->get_cache_class( $this->default_cache_class )
 		) {
 			$url = $this->normalize_url( $url );
 			$this->cache_instances[ $url ] = new $class( $url );
 
-			return true;
+			return $this->cache_instances[ $url ];
 		}
 
 		return false;
