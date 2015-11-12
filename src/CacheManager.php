@@ -10,9 +10,10 @@ class CacheManager {
 	protected $plugin_name;
 	protected $plugin_version;
 
+	protected $cache_instances = [];
 	protected $default_cache_class = null;
 	protected $registered_cache_classes = [];
-	protected $cache_instances = [];
+	protected $toolbar;
 
 	public function __construct( $name, $version ) {
 		$this->plugin_name = $name;
@@ -74,7 +75,34 @@ class CacheManager {
 			throw new \Exception( 'Default cache class does not exist.' );
 		}
 
-		$this->create_cache_instance( 'fake' );
+		if ( is_admin_bar_showing() && $url = $this->maybe_get_current_page_url() ) {
+			$this->create_cache_instance( $url );
+
+			$this->toolbar = new Toolbar( $this->get_cache_instances( $url ) );
+			$this->add_toolbar_nodes();
+
+			do_action( __NAMESPACE__ . '\\toolbar_init', $this->toolbar );
+
+			add_action( 'admin_bar_menu', [ $this->toolbar, 'admin_bar_menu' ], 999 );
+			add_action( 'admin_init', [ $this->toolbar, 'admin_init' ], 999 );
+
+			/**
+			 TEMPORARY
+			 */
+			foreach ( [ 'wp_head', 'admin_head' ] as $action ) {
+				add_action( $action, function() {
+					echo '<style>';
+					echo '#wpadminbar .cache-manager-icon { border-radius: 50%; display: inline-block; float: left; height: 12px; margin: 10px 6px 0 0; width: 12px; }';
+					echo '#wpadminbar #wp-admin-bar-purge-cache .ab-item { height: auto; padding-bottom: 12px; }';
+					echo '.exists { background: green; }';
+					echo '.does-not-exist { background: red; }';
+					echo '</style>';
+				} );
+			}
+			/**
+			 TEMPORARY
+			 */
+		}
 	}
 
 	public function normalize_url( $url ) {
@@ -118,6 +146,47 @@ class CacheManager {
 		return false;
 	}
 
+	protected function add_toolbar_nodes() {
+		$classes = [ 'cache-manager-icon' ];
+
+		if ( $this->toolbar->get_cache_instance()->exists() ) {
+			$classes[] = 'exists';
+		} else {
+			$classes[] = 'does-not-exist';
+		}
+
+		$this->toolbar->add_node( [
+			'id'         => 'ssn-cache-manager',
+			'title'      => sprintf( 'Cache<div class="%1$s"></div>', implode( ' ', $classes ) ),
+			'no-href'    => true,
+		] );
+
+		$this->toolbar->add_node( [
+			'id'         => 'ssn-refresh-cache',
+			'title'      => 'Refresh Cache',
+			'action-cb'  => [ $this, 'refresh_callback' ],
+		] );
+
+		$this->toolbar->add_node( [
+			'id'         => 'ssn-delete-cache',
+			'title'      => 'Delete Cache',
+			'action-cb'  => [ $this, 'delete_callback' ],
+		] );
+
+		$this->toolbar->add_node( [
+			'id'         => 'ssn-create-cache',
+			'title'      => 'Create Cache',
+			'action-cb'  => [ $this, 'create_callback' ],
+		] );
+
+		$this->toolbar->add_node( [
+			'id'         => 'ssn-flush-cache',
+			'title'      => 'Flush Cache',
+			'action-cb'  => [ $this, 'flush_callback' ],
+			'href'       => add_query_arg( [ 'action' => 'ssn-flush-cache' ], admin_url( 'index.php' ) ),
+		] );
+	}
+
 	protected function create_cache_instance( $url ) {
 		if (
 			! $this->get_cache_instances( $url ) &&
@@ -131,5 +200,25 @@ class CacheManager {
 		}
 
 		return false;
+	}
+
+	protected function maybe_get_current_page_url() {
+		$url = false;
+
+		if ( is_admin() ) {
+			global $pagenow;
+
+			if ( 'post.php' === $pagenow ) {
+				if ( isset( $_GET['action'] ) && 'edit' === $_GET['action'] && isset( $_GET['post'] ) ) {
+					$url = get_permalink( absint( $_GET['post'] ) );
+				}
+			}
+		} else {
+			$parsed_url = parse_url( home_url( $_SERVER['REQUEST_URI'] ) );
+
+			$url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'];
+		}
+
+		return $url;
 	}
 }
