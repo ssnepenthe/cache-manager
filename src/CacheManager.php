@@ -7,11 +7,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class CacheManager {
+	protected $plugin_name;
+	protected $plugin_version;
+
 	protected $default_cache_class = null;
 	protected $registered_cache_classes = [];
 	protected $cache_instances = [];
 
-	public function __construct() {}
+	public function __construct( $name, $version ) {
+		$this->plugin_name = $name;
+		$this->plugin_version = $version;
+	}
 
 	public function add_cache_class( $id, $class ) {
 		if ( ! isset( $this->registered_cache_classes[ $id ] ) ) {

@@ -13,7 +13,7 @@ if ( file_exists( $plugin_root . '/vendor/autoload.php' ) ) {
 }
 
 function init() {
-	$manager = new CacheManager();
+	$manager = new CacheManager( 'cache-manager', '0.1.0' );
 
 	$manager->add_cache_class( 'fastcgi', 'SSNepenthe\\CacheManager\\NginxFastCGICache' );
 	$manager->set_default_cache_class( 'fastcgi' );
