@@ -7,13 +7,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Toolbar {
-	protected $cache_instance;
 	protected $defaults;
-	protected $nodes;
+	protected $nodes = [];
 
-	public function __construct( FullPageCache $cache_instance ) {
-		$this->cache_instance = $cache_instance;
-
+	public function __construct() {
 		$this->defaults = [
 			// Mirror the defaults for WP_Admin_Bar->add_node().
 			'group'      => false,
@@ -24,23 +21,17 @@ class Toolbar {
 			'title'      => false,
 
 			// And some plugin-specific extras.
-			'action-cb'  => false,
 			'capability' => 'edit_theme_options',
 			'display-cb' => '__return_true',
-			'no-href'    => false,
 		];
 	}
 
-	public function add_node( $args ) {
-		if ( ! is_admin_bar_showing() ) {
-			return false;
-		}
-
-		if ( ! is_array( $args ) || ! isset( $args['id'] ) ) {
-			return false;
-		}
-
+	public function add_node( array $args ) {
 		$args = $this->parse_args( $args );
+
+		if ( ! $args['id'] ) {
+			return false;
+		}
 
 		if ( ! current_user_can( $args['capability'] ) ) {
 			return false;
@@ -60,54 +51,30 @@ class Toolbar {
 		return true;
 	}
 
-	public function admin_bar_menu( $wp_admin_bar ) {
-		if ( ! empty( $this->nodes ) ) {
-			foreach ( $this->nodes as $id => $args ) {
-				if ( is_callable( $args['display-cb'] ) && call_user_func( $args['display-cb'] ) ) {
-					$wp_admin_bar->add_node( $args );
-				}
+	public function add_nodes( array $nodes ) {
+		foreach ( $nodes as $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
 			}
+
+			$this->add_node( $node );
 		}
 	}
 
-	public function admin_init() {
-		if ( ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) ) {
-			return;
-		}
-
+	public function admin_bar_menu( $wp_admin_bar ) {
 		if ( empty( $this->nodes ) ) {
 			return;
 		}
 
-		$action = preg_replace( "/[^a-zA-Z0-9_-]/", '', $_GET['action'] );
-		$nonce = preg_replace( "/[^a-fA-F0-9]/", '', $_GET['_wpnonce'] );
-
-		if ( '' === $action || '' === $nonce ) {
-			return;
+		foreach ( $this->nodes as $id => $args ) {
+			if ( call_user_func( $args['display-cb'] ) ) {
+				$wp_admin_bar->add_node( $args );
+			}
 		}
-
-		if ( ! $node = $this->get_nodes( $action ) ) {
-			return;
-		}
-
-		$intended = wp_verify_nonce( $nonce, 'SSNepenthe\\CacheManager\\' . $action );
-		$allowed = current_user_can( $node['capability'] );
-
-		if ( ! $intended || ! $allowed ) {
-			return;
-		}
-
-		if ( ! is_callable( $node['action-cb'] ) ) {
-			return;
-		}
-
-		call_user_func( $node['action-cb'], $path );
-		wp_safe_redirect( wp_get_referer() );
-		exit;
 	}
 
-	public function get_cache_instance() {
-		return $this->cache_instance;
+	public function get_node( $id ) {
+		return $this->get_nodes( $id );
 	}
 
 	public function get_nodes( $id = null ) {
@@ -123,13 +90,28 @@ class Toolbar {
 	}
 
 	public function remove_node( $id ) {
-		if ( isset( $this->nodes[ $id ] ) ) {
-			unset( $this->nodes[ $id ] );
-
-			return true;
+		if ( ! isset( $this->nodes[ $id ] ) ) {
+			return false;
 		}
 
-		return false;
+		// Don't remove the primary node unless it is the only node.
+		if ( $id === $this->defaults['parent'] && 1 < count( $this->nodes ) ) {
+			return false;
+		}
+
+		unset( $this->nodes[ $id ] );
+
+		return true;
+	}
+
+	public function remove_nodes( array $ids ) {
+		foreach( $ids as $id ) {
+			if ( ! is_string( $id ) ) {
+				continue;
+			}
+
+			$this->remove_node( $id );
+		}
 	}
 
 	protected function parse_args( $args ) {
@@ -144,25 +126,7 @@ class Toolbar {
 		}
 
 		if ( ! $args['title'] && $args['id'] ) {
-			$args['title'] = ucwords( str_replace( [ '-', '_' ], ' ', $id ) );
-		}
-
-		if ( ! $args['href'] && ! $args['no-href'] ) {
-			$args['href'] = admin_url( 'index.php' );
-		}
-
-		if ( $args['href'] ) {
-			// Assume that if there is a query string, URL is already prepared.
-			if ( false === strpos( $args['href'], '?' ) ) {
-				$path = urlencode( $this->cache_instance->get_path() );
-
-				$args['href'] = add_query_arg( [
-					'action' => $args['id'],
-					'path' => $path,
-				], $args['href'] );
-			}
-
-			$args['href'] = wp_nonce_url( $args['href'], 'SSNepenthe\\CacheManager\\' . $args['id'] );
+			$args['title'] = ucwords( str_replace( [ '-', '_' ], ' ', $args['id'] ) );
 		}
 
 		return $args;
