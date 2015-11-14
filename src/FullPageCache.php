@@ -3,7 +3,7 @@
 namespace SSNepenthe\CacheManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	die();
+	die;
 }
 
 abstract class FullPageCache {

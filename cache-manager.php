@@ -21,7 +21,7 @@
 namespace SSNepenthe\CacheManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	die();
+	die;
 }
 
 $plugin_root = __DIR__;
