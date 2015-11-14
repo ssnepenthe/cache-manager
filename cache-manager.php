@@ -1,4 +1,22 @@
 <?php
+/**
+ * A WordPress mu-plugin to help manage various full-page caches.
+ *
+ * @package cache-manager
+ */
+
+/**
+ * Plugin Name: Cache Manager
+ * Plugin URI: https://github.com/ssnepenthe/cache-manager
+ * Description:
+ * Version:
+ * Author:
+ * Author URI:
+ * License: GPL-2.0
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:
+ * Domain Path:
+ */
 
 namespace SSNepenthe\CacheManager;
 
