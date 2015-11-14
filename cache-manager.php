@@ -30,6 +30,9 @@ if ( file_exists( $plugin_root . '/vendor/autoload.php' ) ) {
 	require_once $plugin_root . '/vendor/autoload.php';
 }
 
+/**
+ * Initializes the plugin on the init hook.
+ */
 function init() {
 	$manager = new CacheManager( 'cache-manager', '0.1.0' );
 
@@ -48,6 +51,9 @@ function init() {
 }
 add_action( 'init', __NAMESPACE__ . '\\init' );
 
+/**
+ * Outputs a cache timestamp in wp_head.
+ */
 function timestamp() {
 	$time = current_time( 'Y-m-d H:i:s', true );
 
