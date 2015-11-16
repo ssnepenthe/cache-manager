@@ -18,8 +18,6 @@
  * Domain Path:
  */
 
-namespace SSNepenthe\CacheManager;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
@@ -33,12 +31,12 @@ if ( file_exists( $plugin_root . '/vendor/autoload.php' ) ) {
 /**
  * Initializes the plugin on the init hook.
  */
-function init() {
+function cache_manager_init() {
 	if ( ! is_admin() && ! is_admin_bar_showing() ) {
 		return;
 	}
 
-	$manager = new CacheManager( 'cache-manager', '0.1.0' );
+	$manager = new \SSNepenthe\CacheManager\CacheManager( 'cache-manager', '0.1.0' );
 
 	$manager->add_cache_class(
 		'fastcgi',
@@ -105,12 +103,12 @@ function init() {
 		// How to handle???
 	}
 }
-add_action( 'init', __NAMESPACE__ . '\\init' );
+add_action( 'init', 'cache_manager_init' );
 
 /**
  * Outputs a cache timestamp in wp_head.
  */
-function timestamp() {
+function cache_manager_timestamp() {
 	$time = current_time( 'Y-m-d H:i:s', true );
 
 	echo sprintf(
@@ -120,4 +118,4 @@ function timestamp() {
 
 	echo "\n";
 }
-add_action( 'wp_head', __NAMESPACE__ . '\\timestamp', 0 );
+add_action( 'wp_head', 'cache_manager_timestamp', 0 );
