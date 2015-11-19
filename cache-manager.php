@@ -8,10 +8,10 @@
 /**
  * Plugin Name: Cache Manager
  * Plugin URI: https://github.com/ssnepenthe/cache-manager
- * Description:
- * Version:
- * Author:
- * Author URI:
+ * Description: This plugin provides tools to manage various full-page caches.
+ * Version: 0.1.0
+ * Author: SSNepenthe
+ * Author URI: https://github.com/ssnepenthe
  * License: GPL-2.0
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:
