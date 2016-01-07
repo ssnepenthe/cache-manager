@@ -82,6 +82,7 @@ class NginxFastCGICache extends FullPageCache {
 		if ( ! $this->exists() ) {
 			$args = [
 				'blocking' => false,
+				'sslverify' => apply_filters( __NAMESPACE__ . '\\sslverify', true ),
 				'timeout'  => 1, // Wish it could be lower but WP_Http won't allow it.
 			];
 
@@ -161,6 +162,7 @@ class NginxFastCGICache extends FullPageCache {
 		$args = [
 			'blocking' => false,
 			'headers'  => [ 'X-Nginx-Cache-Purge' => '1' ], // Filterable header?
+			'sslverify' => apply_filters( __NAMESPACE__ . '\\sslverify', true ),
 			'timeout'  => 1, // Wish it could be lower but WP_Http won't allow it.
 		];
 
