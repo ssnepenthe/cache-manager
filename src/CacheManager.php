@@ -2,9 +2,9 @@
 /**
  * Defines the main plugin class.
  *
- * @package cache-manager
- *
  * @todo replace all uses of $_GET, $_SERVER supers with filter_input().
+ *
+ * @package cache-manager
  */
 
 namespace SSNepenthe\CacheManager;
@@ -13,17 +13,80 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
+/**
+ * This class manages all aspects of this plugin from cache classes and toolbar
+ * nodes to hooking in to WordPress to handling user actions.
+ */
 class CacheManager {
+	/**
+	 * List of registered cache classes.
+	 *
+	 * @var array
+	 */
 	protected $cache_classes = [];
+
+	/**
+	 * Array of cache instances where each instance represents a single URL.
+	 *
+	 * @var array
+	 */
 	protected $cache_instances = [];
+
+	/**
+	 * The default cache class.
+	 *
+	 * @var mixed Null or string
+	 */
 	protected $default_cache_class = null;
+
+	/**
+	 * Default toolbar node args.
+	 *
+	 * @var array
+	 */
 	protected $node_defaults;
+
+	/**
+	 * Plugin name.
+	 *
+	 * @var string
+	 */
 	protected $plugin_name;
+
+	/**
+	 * Current plugin version.
+	 *
+	 * @var string
+	 */
 	protected $plugin_version;
+
+	/**
+	 * Toolbar instance.
+	 *
+	 * @var SSNepenthe\CacheManager\Toolbar
+	 */
 	protected $toolbar = null;
+
+	/**
+	 * Array of toolbar node args.
+	 *
+	 * @var array
+	 */
 	protected $toolbar_nodes = [];
+
+	/**
+	 * Index of normalized and parsed URLs.
+	 *
+	 * @var array
+	 */
 	protected $urls;
 
+	/**
+	 * Constructor
+	 *
+	 * @param string $name Plugin name.
+	 * @param string $version Current plugin version.
+	 */
 	public function __construct( $name, $version ) {
 		$this->node_defaults = [
 			'href'       => false,
@@ -42,6 +105,14 @@ class CacheManager {
 		];
 	}
 
+	/**
+	 * Register a cache handler class.
+	 *
+	 * @param string $id Handler ID.
+	 * @param string $class Fully qualified handler class name.
+	 *
+	 * @return bool
+	 */
 	public function add_cache_class( $id, $class ) {
 		if ( ! isset( $this->cache_classes[ $id ] ) ) {
 			$this->cache_classes[ $id ] = $class;
@@ -52,6 +123,11 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Register multiple cache handler classes.
+	 *
+	 * @param array $classes List of id => class name pairs.
+	 */
 	public function add_cache_classes( array $classes ) {
 		foreach ( $classes as $id => $class ) {
 			if ( ! is_string( $id ) || ! is_string( $class ) ) {
@@ -62,6 +138,11 @@ class CacheManager {
 		}
 	}
 
+	/**
+	 * Add a node to the cache toolbar menu.
+	 *
+	 * @param array $args Toolbar node args.
+	 */
 	public function add_toolbar_node( array $args ) {
 		$args = $this->parse_args( $args );
 
@@ -82,6 +163,11 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Add multiple nodes to the cache toolbar menu.
+	 *
+	 * @param array $nodes Array of arrays containing node args.
+	 */
 	public function add_toolbar_nodes( array $nodes ) {
 		foreach ( $nodes as $args ) {
 			if ( ! is_array( $args ) ) {
@@ -92,6 +178,10 @@ class CacheManager {
 		}
 	}
 
+	/**
+	 * Handles user interaction by calling the registered action callback after
+	 * verifying nonce and user capabilities.
+	 */
 	public function admin_init() {
 		if ( ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) ) {
 			return;
@@ -131,6 +221,13 @@ class CacheManager {
 		exit;
 	}
 
+	/**
+	 * Adds URLs and cache instances as needed and returns the cache instance.
+	 *
+	 * @param string $url Current URL.
+	 *
+	 * @return mixed Cache handler class (e.g. SSNepenthe\CacheManager\FullPageCache) or false.
+	 */
 	public function cache_instance( $url ) {
 		if ( ! $normalized = $this->get_normalized_url( $url ) ) {
 			$this->add_url( $url );
@@ -146,6 +243,9 @@ class CacheManager {
 		return $this->get_cache_instance( $normalized );
 	}
 
+	/**
+	 * Toolbar callback for creating a cache item.
+	 */
 	public function create_callback() {
 		$path = filter_input( INPUT_GET, 'path', FILTER_SANITIZE_URL );
 
@@ -157,6 +257,11 @@ class CacheManager {
 		$this->cache_instance( $url )->create();
 	}
 
+	/**
+	 * Create cache instance based on the page currently being viewed.
+	 *
+	 * @return mixed Cache handler class or false
+	 */
 	public function current_instance() {
 		$url = false;
 
@@ -185,6 +290,9 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Toolbar callback for deleting a cache item.
+	 */
 	public function delete_callback() {
 		$path = filter_input( INPUT_GET, 'path', FILTER_SANITIZE_URL );
 
@@ -196,6 +304,9 @@ class CacheManager {
 		$instance = $this->cache_instance( $url )->delete();
 	}
 
+	/**
+	 * Toolbar callback for flushing all cache items.
+	 */
 	public function flush_callback() {
 		$path = filter_input( INPUT_GET, 'path', FILTER_SANITIZE_URL );
 
@@ -207,10 +318,24 @@ class CacheManager {
 		$instance = $this->cache_instance( $url )->flush();
 	}
 
+	/**
+	 * Get a registered cache class.
+	 *
+	 * @param string $id Handler class ID.
+	 *
+	 * @return mixed String or false
+	 */
 	public function get_cache_class( $id ) {
 		return $this->get_cache_classes( $id );
 	}
 
+	/**
+	 * Getter for cache_classes.
+	 *
+	 * @param mixed $id Null or string of handler class ID.
+	 *
+	 * @return mixed Array of cache classes, string of specific class ID or false.
+	 */
 	public function get_cache_classes( $id = null ) {
 		if ( is_null( $id ) ) {
 			return $this->cache_classes;
@@ -223,10 +348,25 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Getter for a single cache instance.
+	 *
+	 * @param string $url Cache URL.
+	 *
+	 * @return mixed Handler instance or false
+	 */
 	public function get_cache_instance( $url ) {
 		return $this->get_cache_instances( $url );
 	}
 
+	/**
+	 * Getter for cache_instances.
+	 *
+	 * @param mixed $url Null or string of cache URL.
+	 *
+	 * @return mixed Array of cache handler instances, single cache handler
+	 *               instance or false.
+	 */
 	public function get_cache_instances( $url = null ) {
 		if ( is_null( $url ) ) {
 			return $this->cache_instances;
@@ -239,11 +379,24 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Getter for default_cache_class.
+	 *
+	 * @return string
+	 */
 	public function get_default_cache_class() {
 		return $this->default_cache_class;
 	}
 
-	// Should probably call add_url() if not set.
+	/**
+	 * Getter for single normalized URL.
+	 *
+	 * @param string $url Single URL.
+	 *
+	 * @todo Consider calling add_url() if not already set.
+	 *
+	 * @return mixed String or false.
+	 */
 	public function get_normalized_url( $url ) {
 		if ( isset( $this->urls['normalized'][ $url ] ) ) {
 			return $this->urls['normalized'][ $url ];
@@ -252,7 +405,15 @@ class CacheManager {
 		return false;
 	}
 
-	// Should probably call add_url() if not set.
+	/**
+	 * Getter for single parsed URL.
+	 *
+	 * @param string $url Single URL.
+	 *
+	 * @todo Consider calling add_url() if not already set.
+	 *
+	 * @return mixed String or false.
+	 */
 	public function get_parsed_url( $url ) {
 		if ( $normalized = $this->get_normalized_url( $url ) ) {
 			return $this->urls['parsed'][ $normalized ];
@@ -261,22 +422,51 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Getter for plugin_name
+	 *
+	 * @return string
+	 */
 	public function get_plugin_name() {
 		return $this->plugin_name;
 	}
 
+	/**
+	 * Getter for plugin version.
+	 *
+	 * @return string
+	 */
 	public function get_plugin_version() {
 		return $this->plugin_version;
 	}
 
+	/**
+	 * Getter for toolbar.
+	 *
+	 * @return SSNepenthe\CacheManager\Toolbar
+	 */
 	public function get_toolbar() {
 		return $this->toolbar;
 	}
 
+	/**
+	 * Getter for single toolbar node.
+	 *
+	 * @param string $id Node ID.
+	 *
+	 * @return mixed Array of args or false.
+	 */
 	public function get_toolbar_node( $id ) {
 		return $this->get_toolbar_nodes( $id );
 	}
 
+	/**
+	 * Getter for toolbar_nodes.
+	 *
+	 * @param mixed $id Null or string of node ID.
+	 *
+	 * @return mixed Array of nodes, array of args of single node or false.
+	 */
 	public function get_toolbar_nodes( $id = null ) {
 		if ( is_null( $id ) ) {
 			return $this->toolbar_nodes;
@@ -290,6 +480,13 @@ class CacheManager {
 	}
 
 	// Should probably call add_url() if not already set.
+	/**
+	 * Getter for urls.
+	 *
+	 * @param string $url Single URL.
+	 *
+	 * @return array
+	 */
 	public function get_url( $url ) {
 		if ( isset( $this->urls['normalized'][ $url ] ) ) {
 			$normalized = $this->urls['normalized'][ $url ];
@@ -305,6 +502,11 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Hook in to WordPress.
+	 *
+	 * @throws \Exception If no default is set or no matching handler is found.
+	 */
 	public function init() {
 		if ( is_null( $this->default_cache_class ) ) {
 			throw new \Exception( 'No default cache class set.' );
@@ -334,6 +536,9 @@ class CacheManager {
 		);
 	}
 
+	/**
+	 * Toolbar callback for regenerating cache item.
+	 */
 	public function refresh_callback() {
 		$path = filter_input( INPUT_GET, 'path', FILTER_SANITIZE_URL );
 
@@ -345,6 +550,13 @@ class CacheManager {
 		$instance = $this->cache_instance( $url )->refresh();
 	}
 
+	/**
+	 * Remove a single registered cache handler class.
+	 *
+	 * @param string $id Handler ID.
+	 *
+	 * @return bool
+	 */
 	public function remove_cache_class( $id ) {
 		if ( isset( $this->cache_classes[ $id ] ) ) {
 			unset( $this->cache_classes[ $id ] );
@@ -359,6 +571,11 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Remove multiple cache handler classes.
+	 *
+	 * @param array $ids Array of handler class IDs.
+	 */
 	public function remove_cache_classes( array $ids ) {
 		foreach ( $ids as $id ) {
 			if ( ! is_string( $id ) ) {
@@ -369,6 +586,13 @@ class CacheManager {
 		}
 	}
 
+	/**
+	 * Remove a single toolbar node.
+	 *
+	 * @param string $id Node ID.
+	 *
+	 * @return bool
+	 */
 	public function remove_toolbar_node( $id ) {
 		if ( isset( $this->toolbar_nodes[ $id ] ) ) {
 			unset( $this->toolbar_nodes[ $id ] );
@@ -379,6 +603,11 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Remove multiple toolbar nodes.
+	 *
+	 * @param array $ids Array of node IDs.
+	 */
 	public function remove_toolbar_nodes( array $ids ) {
 		foreach ( $ids as $id ) {
 			if ( ! is_string( $id ) ) {
@@ -389,6 +618,13 @@ class CacheManager {
 		}
 	}
 
+	/**
+	 * Setter for default_cache_class.
+	 *
+	 * @param string $id Handler ID.
+	 *
+	 * @return bool
+	 */
 	public function set_default_cache_class( $id ) {
 		if ( isset( $this->cache_classes[ $id ] ) ) {
 			$this->default_cache_class = $id;
@@ -399,6 +635,9 @@ class CacheManager {
 		return false;
 	}
 
+	/**
+	 * Output inline styles for the cache menu.
+	 */
 	public function toolbar_styles() {
 		if ( ! is_admin_bar_showing() && ! is_admin() ) {
 			return;
@@ -438,6 +677,13 @@ TOOLBARSTYLE;
 		echo preg_replace( '/\s+/', ' ', $style );
 	}
 
+	/**
+	 * Calls the cache delete method for a post when a post status changes.
+	 *
+	 * @param string  $new_status New post status.
+	 * @param string  $old_status Previous post status.
+	 * @param WP_Post $post WordPress post object.
+	 */
 	public function transition_post_status( $new_status, $old_status, $post ) {
 		if ( 'publish' !== $old_status && 'private' !== $old_status ) {
 			return;
@@ -448,6 +694,13 @@ TOOLBARSTYLE;
 		$this->cache_instance( $url )->delete();
 	}
 
+	/**
+	 * Creates and saves new cache instances as needed.
+	 *
+	 * @param string $url Cache URL.
+	 *
+	 * @return bool
+	 */
 	protected function add_cache_instance( $url ) {
 		if (
 			! isset( $this->cache_instances[ $url ] ) &&
@@ -462,6 +715,13 @@ TOOLBARSTYLE;
 		return false;
 	}
 
+	/**
+	 * Adds a URL to the URL index if not previously set.
+	 *
+	 * @param string $url Cache URL.
+	 *
+	 * @return bool
+	 */
 	protected function add_url( $url ) {
 		// A lot of this is basically wp_http_validate_url().
 		$original = $url;
@@ -519,6 +779,13 @@ TOOLBARSTYLE;
 		return $r;
 	}
 
+	/**
+	 * Parse args for new toolbar nodes.
+	 *
+	 * @param array $args Toolbar node args.
+	 *
+	 * @return array
+	 */
 	protected function parse_args( array $args ) {
 		$args = wp_parse_args( $args, $this->node_defaults );
 
