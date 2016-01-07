@@ -58,8 +58,8 @@ function cache_manager_init() {
 		[
 			'id'         => 'ssn-cache-manager',
 			'title'      => sprintf(
-				'Cache<div class="%1$s"></div>',
-				implode( ' ', $classes )
+				'Cache<div class="%s"></div>',
+				esc_attr( implode( ' ', $classes ) )
 			),
 			'display-cb' => '__return_true',
 			'no-href'    => true,
@@ -109,13 +109,9 @@ add_action( 'init', 'cache_manager_init' );
  * Outputs a cache timestamp in wp_head.
  */
 function cache_manager_timestamp() {
-	$time = current_time( 'Y-m-d H:i:s', true );
-
 	echo sprintf(
-		'<!-- Page generated on %1$s UTC. -->',
-		esc_html( $time )
+		"<!-- Page generated on %s UTC. -->\n",
+		esc_html( current_time( 'Y-m-d H:i:s', true ) )
 	);
-
-	echo "\n";
 }
 add_action( 'wp_head', 'cache_manager_timestamp', 0 );

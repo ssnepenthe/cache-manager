@@ -104,7 +104,7 @@ class NginxFastCGICache extends FullPageCache {
 
 
 	protected function cache_file_path() {
-		$key = sprintf( '%1$s%2$s%3$s%4$s',
+		$key = sprintf( '%s%s%s%s',
 			$this->get_scheme(),
 			self::METHOD,
 			$this->get_host(),
@@ -118,7 +118,7 @@ class NginxFastCGICache extends FullPageCache {
 		$level_two = substr( $md5, -3, 2 );
 
 		return sprintf(
-			'%1$s/%2$s/%3$s/%4$s',
+			'%s/%s/%s/%s',
 			$this->cache_dir,
 			$level_one,
 			$level_two,
