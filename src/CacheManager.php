@@ -2,8 +2,6 @@
 /**
  * Defines the main plugin class.
  *
- * @todo replace all uses of $_GET, $_SERVER supers with filter_input().
- *
  * @package cache-manager
  */
 
@@ -168,7 +166,10 @@ class CacheManager {
 	 * verifying nonce and user capabilities.
 	 */
 	public function admin_init() {
-		if ( ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) ) {
+		$action = filter_input( INPUT_GET, 'action', FILTER_SANITIZE_STRING );
+		$nonce = filter_input( INPUT_GET, '_wpnonce', FILTER_SANITIZE_STRING );
+
+		if ( is_null( $action ) || is_null( $nonce ) ) {
 			return;
 		}
 
@@ -176,8 +177,8 @@ class CacheManager {
 			return;
 		}
 
-		$action = preg_replace( "/[^a-zA-Z0-9_-]/", '', $_GET['action'] );
-		$nonce = preg_replace( "/[^a-fA-F0-9]/", '', $_GET['_wpnonce'] );
+		$action = preg_replace( "/[^a-zA-Z0-9_-]/", '', $action );
+		$nonce = preg_replace( "/[^a-fA-F0-9]/", '', $nonce );
 
 		if ( '' === $action || '' === $nonce ) {
 			return;
@@ -253,17 +254,21 @@ class CacheManager {
 		if ( is_admin() ) {
 			global $pagenow;
 
+			$action = filter_input( INPUT_GET, 'action', FILTER_SANITIZE_STRING );
+			$post = filter_input( INPUT_GET, 'post', FILTER_SANITIZE_NUMBER_INT );
+
 			if ( 'post.php' === $pagenow ) {
 				if (
-					isset( $_GET['action'] ) &&
-					'edit' === $_GET['action'] &&
-					isset( $_GET['post'] )
+					! is_null( $action ) &&
+					'edit' === $action &&
+					! is_null( $post )
 				) {
-					$url = get_permalink( absint( $_GET['post'] ) );
+					$url = get_permalink( absint( $post ) );
 				}
 			}
 		} else {
-			$parsed_url = parse_url( home_url( $_SERVER['REQUEST_URI'] ) );
+			$request_uri = filter_input( INPUT_SERVER, 'REQUEST_URI', FILTER_SANITIZE_URL );
+			$parsed_url = parse_url( home_url( $request_uri ) );
 
 			$url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . $parsed_url['path'];
 		}
