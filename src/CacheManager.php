@@ -298,13 +298,8 @@ class CacheManager {
 	 * Toolbar callback for flushing all cache items.
 	 */
 	public function flush_callback() {
-		$path = filter_input( INPUT_GET, 'path', FILTER_SANITIZE_URL );
-
-		if ( is_null( $path ) || ! $path ) {
-			return;
-		}
-
-		$url = home_url( $path );
+		// URL isn't important, but necessary to instantiate a cache class.
+		$url = home_url();
 		$instance = $this->cache_instance( $url )->flush();
 	}
 
@@ -536,7 +531,7 @@ class CacheManager {
 </style>
 TOOLBARSTYLE;
 
-		// Pseudo minification...
+		// Pseudo minification... Temporary.
 		echo preg_replace( '/\s+/', ' ', $style );
 	}
 

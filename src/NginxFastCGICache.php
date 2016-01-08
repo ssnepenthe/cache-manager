@@ -122,7 +122,15 @@ class NginxFastCGICache extends FullPageCache {
 		return file_exists( $this->cache_file );
 	}
 
-	public function flush() {}
+	public function flush() {
+		$cache_files = glob( $this->cache_dir . '/**/**/*', GLOB_NOSORT );
+
+		foreach ( $cache_files as $file ) {
+			if ( is_writable( $file ) ) {
+				unlink( $file );
+			}
+		}
+	}
 
 	/**
 	 * Getter for the current URL scheme.
