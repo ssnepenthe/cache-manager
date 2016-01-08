@@ -177,8 +177,8 @@ class CacheManager {
 			return;
 		}
 
-		$action = preg_replace( "/[^a-zA-Z0-9_-]/", '', $action );
-		$nonce = preg_replace( "/[^a-fA-F0-9]/", '', $nonce );
+		$action = preg_replace( '/[^a-zA-Z0-9_-]/', '', $action );
+		$nonce = preg_replace( '/[^a-fA-F0-9]/', '', $nonce );
 
 		if ( '' === $action || '' === $nonce ) {
 			return;
@@ -653,7 +653,7 @@ TOOLBARSTYLE;
 		$args = wp_parse_args( $args, $this->node_defaults );
 
 		if ( $args['id'] ) {
-			$args['id'] = preg_replace( "/[^a-zA-Z0-9_-]/", '', $args['id'] );
+			$args['id'] = preg_replace( '/[^a-zA-Z0-9_-]/', '', $args['id'] );
 
 			if ( '' === $args['id'] ) {
 				$args['id'] = false;
