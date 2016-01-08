@@ -124,21 +124,6 @@ class CacheManager {
 	}
 
 	/**
-	 * Register multiple cache handler classes.
-	 *
-	 * @param array $classes List of id => class name pairs.
-	 */
-	public function add_cache_classes( array $classes ) {
-		foreach ( $classes as $id => $class ) {
-			if ( ! is_string( $id ) || ! is_string( $class ) ) {
-				continue;
-			}
-
-			$this->add_cache_class( $id, $class );
-		}
-	}
-
-	/**
 	 * Add a node to the cache toolbar menu.
 	 *
 	 * @param array $args Toolbar node args.
@@ -380,15 +365,6 @@ class CacheManager {
 	}
 
 	/**
-	 * Getter for default_cache_class.
-	 *
-	 * @return string
-	 */
-	public function get_default_cache_class() {
-		return $this->default_cache_class;
-	}
-
-	/**
 	 * Getter for single normalized URL.
 	 *
 	 * @param string $url Single URL.
@@ -423,33 +399,6 @@ class CacheManager {
 	}
 
 	/**
-	 * Getter for plugin_name
-	 *
-	 * @return string
-	 */
-	public function get_plugin_name() {
-		return $this->plugin_name;
-	}
-
-	/**
-	 * Getter for plugin version.
-	 *
-	 * @return string
-	 */
-	public function get_plugin_version() {
-		return $this->plugin_version;
-	}
-
-	/**
-	 * Getter for toolbar.
-	 *
-	 * @return SSNepenthe\CacheManager\Toolbar
-	 */
-	public function get_toolbar() {
-		return $this->toolbar;
-	}
-
-	/**
 	 * Getter for single toolbar node.
 	 *
 	 * @param string $id Node ID.
@@ -474,29 +423,6 @@ class CacheManager {
 
 		if ( isset( $this->toolbar_nodes[ $id ] ) ) {
 			return $this->toolbar_nodes[ $id ];
-		}
-
-		return false;
-	}
-
-	// Should probably call add_url() if not already set.
-	/**
-	 * Getter for urls.
-	 *
-	 * @param string $url Single URL.
-	 *
-	 * @return array
-	 */
-	public function get_url( $url ) {
-		if ( isset( $this->urls['normalized'][ $url ] ) ) {
-			$normalized = $this->urls['normalized'][ $url ];
-
-			$parsed = $this->urls['parsed'][ $normalized ];
-
-			return [
-				'normalized' => $normalized,
-				'parsed'     => $parsed,
-			];
 		}
 
 		return false;
@@ -548,74 +474,6 @@ class CacheManager {
 
 		$url = home_url( $path );
 		$instance = $this->cache_instance( $url )->refresh();
-	}
-
-	/**
-	 * Remove a single registered cache handler class.
-	 *
-	 * @param string $id Handler ID.
-	 *
-	 * @return bool
-	 */
-	public function remove_cache_class( $id ) {
-		if ( isset( $this->cache_classes[ $id ] ) ) {
-			unset( $this->cache_classes[ $id ] );
-
-			if ( $id === $this->default_cache_class ) {
-				$this->default_cache_class = null;
-			}
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Remove multiple cache handler classes.
-	 *
-	 * @param array $ids Array of handler class IDs.
-	 */
-	public function remove_cache_classes( array $ids ) {
-		foreach ( $ids as $id ) {
-			if ( ! is_string( $id ) ) {
-				continue;
-			}
-
-			$this->remove_cache_class( $id );
-		}
-	}
-
-	/**
-	 * Remove a single toolbar node.
-	 *
-	 * @param string $id Node ID.
-	 *
-	 * @return bool
-	 */
-	public function remove_toolbar_node( $id ) {
-		if ( isset( $this->toolbar_nodes[ $id ] ) ) {
-			unset( $this->toolbar_nodes[ $id ] );
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Remove multiple toolbar nodes.
-	 *
-	 * @param array $ids Array of node IDs.
-	 */
-	public function remove_toolbar_nodes( array $ids ) {
-		foreach ( $ids as $id ) {
-			if ( ! is_string( $id ) ) {
-				continue;
-			}
-
-			$this->remove_toolbar_node( $id );
-		}
 	}
 
 	/**
