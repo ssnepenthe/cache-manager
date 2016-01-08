@@ -1,12 +1,15 @@
 {
     "name": "ssnepenthe/cache-manager",
-    "description": "WordPress plugin which provides tools to help manage various full-page caches.",
+    "description": "WordPress mu-plugin for managing the Nginx fastcgi cache. Easily extended to manage other caches.",
     "type": "wordpress-muplugin",
     "homepage": "https://github.com/ssnepenthe/cache-manager",
     "license": "GPL-2.0",
     "require": {
         "php": ">=5.4",
-        "composer/installers": "^1.0.21"
+        "composer/installers": "^1.0.22"
+    },
+    "suggest": {
+        "ssnepenthe/horme": "Extends the WordPress mu-plugin system to autoload composer packages of type: wordpress-muplugin"
     },
     "autoload": {
     	"psr-4": { "SSNepenthe\\CacheManager\\": "src/" }
