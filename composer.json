@@ -6,10 +6,10 @@
     "license": "GPL-2.0",
     "require": {
         "php": ">=5.4",
-        "composer/installers": "^1.0.22"
+        "composer/installers": "^1.0.23"
     },
     "suggest": {
-        "ssnepenthe/horme": "Extends the WordPress mu-plugin system to autoload composer packages of type: wordpress-muplugin"
+        "ssnepenthe/horme": "Extends the WordPress mu-plugin system to autoload composer packages in subdirectories of the WordPress must-use plugin directory."
     },
     "autoload": {
     	"psr-4": { "SSNepenthe\\CacheManager\\": "src/" }
