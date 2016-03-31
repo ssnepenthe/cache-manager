@@ -57,7 +57,7 @@ add_action( 'init', 'cache_manager_init' );
  * Outputs a cache timestamp in wp_head.
  */
 function cache_manager_timestamp() {
-	echo sprintf(
+	printf(
 		"<!-- Page generated on %s UTC. -->\n",
 		esc_html( current_time( 'Y-m-d H:i:s', true ) )
 	);
