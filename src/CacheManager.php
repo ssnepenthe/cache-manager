@@ -38,41 +38,6 @@ class CacheManager {
 	protected $default_cache_class = null;
 
 	/**
-	 * Default toolbar node args.
-	 *
-	 * @var array
-	 */
-	protected $node_defaults;
-
-	/**
-	 * Plugin name.
-	 *
-	 * @var string
-	 */
-	protected $plugin_name;
-
-	/**
-	 * Current plugin version.
-	 *
-	 * @var string
-	 */
-	protected $plugin_version;
-
-	/**
-	 * Toolbar instance.
-	 *
-	 * @var SSNepenthe\CacheManager\Toolbar
-	 */
-	protected $toolbar = null;
-
-	/**
-	 * Array of toolbar node args.
-	 *
-	 * @var array
-	 */
-	protected $toolbar_nodes = [];
-
-	/**
 	 * Index of normalized and parsed URLs.
 	 *
 	 * @var array
@@ -85,18 +50,7 @@ class CacheManager {
 	 * @param string $name Plugin name.
 	 * @param string $version Current plugin version.
 	 */
-	public function __construct( $name, $version ) {
-		$this->node_defaults = [
-			'href'       => false,
-			'id'         => false,
-			'action-cb'  => false,
-			'capability' => 'edit_theme_options',
-			'no-href'    => false,
-		];
-
-		$this->plugin_name = $name;
-		$this->plugin_version = $version;
-
+	public function __construct() {
 		$this->urls = [
 			'normalized' => [],
 			'parsed'     => [],
@@ -115,96 +69,14 @@ class CacheManager {
 		if ( ! isset( $this->cache_classes[ $id ] ) ) {
 			$this->cache_classes[ $id ] = $class;
 
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Add a node to the cache toolbar menu.
-	 *
-	 * @param array $args Toolbar node args.
-	 */
-	public function add_toolbar_node( array $args ) {
-		$args = $this->parse_args( $args );
-
-		if ( ! $args['id'] ) {
-			return false;
-		}
-
-		if ( $args['href'] && ! $args['action-cb'] ) {
-			return false;
-		}
-
-		if ( ! isset( $this->toolbar_nodes[ $args['id'] ] ) ) {
-			$this->toolbar_nodes[ $args['id'] ] = $args;
-
-			return true;
-		}
-
-		return false;
-	}
-
-	/**
-	 * Add multiple nodes to the cache toolbar menu.
-	 *
-	 * @param array $nodes Array of arrays containing node args.
-	 */
-	public function add_toolbar_nodes( array $nodes ) {
-		foreach ( $nodes as $args ) {
-			if ( ! is_array( $args ) ) {
-				continue;
+			if ( is_null( $this->default_cache_class ) ) {
+				$this->set_default_cache_class( $id );
 			}
 
-			$this->add_toolbar_node( $args );
-		}
-	}
-
-	/**
-	 * Handles user interaction by calling the registered action callback after
-	 * verifying nonce and user capabilities.
-	 */
-	public function admin_init() {
-		$action = filter_input( INPUT_GET, 'action', FILTER_SANITIZE_STRING );
-		$nonce = filter_input( INPUT_GET, '_wpnonce', FILTER_SANITIZE_STRING );
-
-		if ( is_null( $action ) || is_null( $nonce ) ) {
-			return;
+			return true;
 		}
 
-		if ( empty( $this->toolbar_nodes ) ) {
-			return;
-		}
-
-		$action = preg_replace( '/[^a-zA-Z0-9_-]/', '', $action );
-		$nonce = preg_replace( '/[^a-fA-F0-9]/', '', $nonce );
-
-		if ( '' === $action || '' === $nonce ) {
-			return;
-		}
-
-		if ( ! $node = $this->get_toolbar_node( $action ) ) {
-			return;
-		}
-
-		$intended = wp_verify_nonce(
-			$nonce,
-			'SSNepenthe\\CacheManager\\' . $action
-		);
-		$allowed = current_user_can( $node['capability'] );
-
-		if ( ! $intended || ! $allowed ) {
-			return;
-		}
-
-		if ( ! is_callable( $node['action-cb'] ) ) {
-			return;
-		}
-
-		call_user_func( $node['action-cb'] );
-		wp_safe_redirect( wp_get_referer() );
-		exit;
+		return false;
 	}
 
 	/**
@@ -399,36 +271,6 @@ class CacheManager {
 	}
 
 	/**
-	 * Getter for single toolbar node.
-	 *
-	 * @param string $id Node ID.
-	 *
-	 * @return mixed Array of args or false.
-	 */
-	public function get_toolbar_node( $id ) {
-		return $this->get_toolbar_nodes( $id );
-	}
-
-	/**
-	 * Getter for toolbar_nodes.
-	 *
-	 * @param mixed $id Null or string of node ID.
-	 *
-	 * @return mixed Array of nodes, array of args of single node or false.
-	 */
-	public function get_toolbar_nodes( $id = null ) {
-		if ( is_null( $id ) ) {
-			return $this->toolbar_nodes;
-		}
-
-		if ( isset( $this->toolbar_nodes[ $id ] ) ) {
-			return $this->toolbar_nodes[ $id ];
-		}
-
-		return false;
-	}
-
-	/**
 	 * Hook in to WordPress.
 	 *
 	 * @throws \Exception If no default is set or no matching handler is found.
@@ -491,48 +333,6 @@ class CacheManager {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Output inline styles for the cache menu.
-	 */
-	public function toolbar_styles() {
-		if ( ! is_admin_bar_showing() && ! is_admin() ) {
-			return;
-		}
-
-		if ( ! $this->current_instance() ) {
-			return;
-		}
-
-		$style = <<<TOOLBARSTYLE
-<style type="text/css">
-	#wpadminbar .cache-manager-icon {
-		border-radius: 50%;
-		display: inline-block;
-		float: left;
-		height: 12px;
-		margin: 10px 6px 0 0;
-		width: 12px;
-	}
-
-	#wpadminbar #wp-admin-bar-purge-cache .ab-item {
-		height: auto;
-		padding-bottom: 12px;
-	}
-
-	.exists {
-		background: green;
-	}
-
-	.does-not-exist {
-		background: red;
-	}
-</style>
-TOOLBARSTYLE;
-
-		// Pseudo minification... Temporary.
-		echo preg_replace( '/\s+/', ' ', $style );
 	}
 
 	/**
