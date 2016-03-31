@@ -276,6 +276,9 @@ class CacheManager {
 	 * @throws \Exception If no default is set or no matching handler is found.
 	 */
 	public function init() {
+		// Allow user to modify instance before initializing.
+		do_action( sprintf( '%s\\init', __NAMESPACE__ ), $this );
+
 		if ( is_null( $this->default_cache_class ) ) {
 			throw new \Exception( 'No default cache class set.' );
 		}

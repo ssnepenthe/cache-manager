@@ -45,9 +45,6 @@ function cache_manager_init() {
 	$manager->set_default_cache_class( 'fastcgi' );
 
 
-	// Allow user to register new cache handlers and change default.
-	do_action( __NAMESPACE__ . '\\init', $manager );
-
 	try {
 		$manager->init();
 	} catch ( \Exception $e ) {
