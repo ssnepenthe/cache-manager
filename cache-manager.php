@@ -1,6 +1,6 @@
 <?php
 /**
- * A WordPress mu-plugin to help manage various full-page caches.
+ * A WordPress mu-plugin for managing Nginx fastcgi cache.
  *
  * @package cache-manager
  */
@@ -29,29 +29,19 @@ if ( file_exists( $plugin_root . '/vendor/autoload.php' ) ) {
 }
 
 /**
- * Initializes the plugin on the init hook.
+ * Initializes the plugin on the init hook. We are hooking in late to ensure
+ * CPTs with custom rewrites have been registered so that get_permalink() works
+ * as it is supposed to.
  */
 function cache_manager_init() {
 	if ( ! is_admin() && ! is_admin_bar_showing() ) {
 		return;
 	}
 
-	$manager = new \SSNepenthe\CacheManager\CacheManager( 'cache-manager', '0.1.0' );
-
-	$manager->add_cache_class(
-		'fastcgi',
-		'SSNepenthe\\CacheManager\\NginxFastCGICache'
-	);
-	$manager->set_default_cache_class( 'fastcgi' );
-
-
-	try {
-		$manager->init();
-	} catch ( \Exception $e ) {
-		// How to handle???
-	}
+	$manager = new SSNepenthe\CacheManager\CacheManager;
+	$manager->init();
 }
-add_action( 'init', 'cache_manager_init' );
+add_action( 'init', 'cache_manager_init', 99 );
 
 /**
  * Outputs a cache timestamp in wp_head.
