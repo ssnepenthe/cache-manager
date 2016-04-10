@@ -23,7 +23,8 @@ class FastCGIFileSystem implements CheckableCache, DeletableCache, FlushableCach
 	protected $directory;
 
 	public function __construct( string $directory ) {
-		$directory = realpath( $directory );
+		// To suppress warnings about open_basdir restrictions.
+		$directory = @realpath( $directory );
 
 		if ( ! is_writable( $directory ) ) {
 			throw new \RuntimeException( sprintf(
