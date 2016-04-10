@@ -1,5 +1,5 @@
 # cache-manager
-WordPress mu-plugin for managing the Nginx fastcgi cache. Easily extended to manage other caches.
+WordPress mu-plugin for managing the Nginx fastcgi cache.
 
 ## Usage
 This plugin assumes that you are running Nginx with fastcgi caching, but not the ngx_cache_purge module.
