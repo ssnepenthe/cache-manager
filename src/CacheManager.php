@@ -39,15 +39,23 @@ class CacheManager {
 				new FastCGIFileSystem( CM_CACHE_DIR )
 			);
 		} catch ( \Exception $e ) {
-			// Fail silently for now.
+			// Cache dir not writable. Fail silently.
 		}
 
 		$path = $this->get_path();
-		$classes = [ 'cm-icon' ];
-		$classes[] = $this->multi_cache->exists( home_url( $path ) ) ?
-			'cm-exists' :
-			'cm-does-not-exist';
-		$icon = sprintf( '<div class="%s"></div>', implode( ' ', $classes ) );
+		$icon = '';
+
+		if ( $this->multi_cache->has_checkable() ) {
+			$classes = [ 'cm-icon' ];
+			$classes[] = $this->multi_cache->exists( home_url( $path ) ) ?
+				'cm-exists' :
+				'cm-does-not-exist';
+
+			$icon = sprintf(
+				'<div class="%s"></div>',
+				implode( ' ', $classes )
+			);
+		}
 
 		$toolbar = new Toolbar;
 
@@ -102,6 +110,10 @@ class CacheManager {
 
 	public function toolbar_styles() {
 		if ( ! is_admin_bar_showing() && ! is_admin() ) {
+			return;
+		}
+
+		if ( ! $this->multi_cache->has_checkable() ) {
 			return;
 		}
 
