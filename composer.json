@@ -5,13 +5,13 @@
     "homepage": "https://github.com/ssnepenthe/cache-manager",
     "license": "GPL-2.0",
     "require": {
-        "php": ">=7.0",
-        "composer/installers": "^1.0.23",
-        "ssnepenthe/metis": "^0.1.0"
+        "php": ">=5.4",
+        "composer/installers": "^1.0",
+        "ssnepenthe/metis": "^0.1"
     },
     "require-dev": {
-        "codegyre/robo": "^0.7.1",
-        "psy/psysh": "^0.7.2"
+        "codegyre/robo": "^0.7",
+        "psy/psysh": "^0.7"
     },
     "suggest": {
         "ssnepenthe/horme": "Extends the WordPress mu-plugin system to autoload composer packages in subdirectories of the WordPress must-use plugin directory."

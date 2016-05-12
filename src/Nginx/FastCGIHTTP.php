@@ -13,7 +13,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class FastCGIHTTP implements CreatableCache, RefreshableCache {
-	public function create( string $url ) {
+	public function create( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$r = false;
 
 		$args = [
@@ -34,7 +41,14 @@ class FastCGIHTTP implements CreatableCache, RefreshableCache {
 		return $r;
 	}
 
-	public function refresh( string $url ) {
+	public function refresh( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$r = false;
 
 		$args = [

@@ -22,7 +22,14 @@ class FastCGIFileSystem implements CheckableCache, DeletableCache, FlushableCach
 	];
 	protected $directory;
 
-	public function __construct( string $directory ) {
+	public function __construct( $directory ) {
+		if ( ! is_string( $directory ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The directory parameter is required to be string, was: %s',
+				gettype( $directory )
+			) );
+		}
+
 		// To suppress warnings about open_basdir restrictions.
 		$directory = @realpath( $directory );
 
@@ -36,7 +43,14 @@ class FastCGIFileSystem implements CheckableCache, DeletableCache, FlushableCach
 		$this->directory = $directory;
 	}
 
-	public function delete( string $url ) {
+	public function delete( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$success = false;
 
 		if ( $this->exists( $url ) && $this->writable( $url ) ) {
@@ -46,7 +60,14 @@ class FastCGIFileSystem implements CheckableCache, DeletableCache, FlushableCach
 		return $success;
 	}
 
-	public function exists( string $url ) {
+	public function exists( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		return file_exists( $this->cache_file_path( $url ) );
 	}
 
@@ -66,11 +87,25 @@ class FastCGIFileSystem implements CheckableCache, DeletableCache, FlushableCach
 		return $success;
 	}
 
-	public function writable( string $url ) {
+	public function writable( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		return is_writable( $this->cache_file_path( $url ) );
 	}
 
-	protected function cache_file_path( string $url ) {
+	protected function cache_file_path( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		if ( isset( $this->data['path'][ $url ] ) ) {
 			return $this->data['path'][ $url ];
 		}
@@ -101,7 +136,14 @@ class FastCGIFileSystem implements CheckableCache, DeletableCache, FlushableCach
 		return $this->data['path'][ $url ];
 	}
 
-	protected function parse_url( string $url ) {
+	protected function parse_url( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		if ( isset( $this->data['url'][ $url ] ) ) {
 			return $this->data['url'][ $url ];
 		}

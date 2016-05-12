@@ -7,5 +7,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 interface RefreshableCache {
-	public function refresh( string $url );
+	public function refresh( $url );
 }

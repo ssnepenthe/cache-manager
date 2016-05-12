@@ -7,5 +7,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 interface DeletableCache {
-	public function delete( string $url );
+	public function delete( $url );
 }

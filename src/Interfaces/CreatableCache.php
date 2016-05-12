@@ -7,5 +7,5 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 interface CreatableCache {
-	public function create( string $url );
+	public function create( $url );
 }

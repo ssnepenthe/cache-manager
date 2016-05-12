@@ -7,6 +7,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 interface CheckableCache {
-	public function exists( string $url );
-	public function writable( string $url );
+	public function exists( $url );
+	public function writable( $url );
 }

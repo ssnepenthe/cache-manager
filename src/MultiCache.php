@@ -56,7 +56,14 @@ class MultiCache {
 		return false;
 	}
 
-	public function create( string $url ) {
+	public function create( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$success = false;
 
 		if ( ! $this->has_creatable() ) {
@@ -71,7 +78,14 @@ class MultiCache {
 
 		return $success;
 	}
-	public function delete( string $url ) {
+	public function delete( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$success = false;
 
 		if ( ! $this->has_deletable() ) {
@@ -87,7 +101,14 @@ class MultiCache {
 		return $success;
 	}
 
-	public function exists( string $url ) {
+	public function exists( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$exists = false;
 
 		if ( ! $this->has_checkable() ) {
@@ -139,7 +160,14 @@ class MultiCache {
 		return $this->has['refreshable'];
 	}
 
-	public function refresh( string $url ) {
+	public function refresh( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$success = false;
 
 		if ( ! $this->has_refreshable() ) {
@@ -155,7 +183,14 @@ class MultiCache {
 		return $success;
 	}
 
-	public function writable( string $url ) {
+	public function writable( $url ) {
+		if ( ! is_string( $url ) ) {
+			throw new \InvalidArgumentException( sprintf(
+				'The url parameter is required to be string, was: %s',
+				gettype( $url )
+			) );
+		}
+
 		$writable = false;
 
 		if ( ! $this->has_checkable() ) {
