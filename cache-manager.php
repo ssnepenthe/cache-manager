@@ -46,9 +46,6 @@ add_action( 'init', 'cache_manager_init', 99 );
  * Outputs a cache timestamp in wp_head.
  */
 function cache_manager_timestamp() {
-	printf(
-		"<!-- Page generated on %s UTC. -->\n",
-		esc_html( current_time( 'Y-m-d H:i:s', true ) )
-	);
+	include_once plugin_dir_path( __FILE__ ) . 'partials/timestamp.php';
 }
 add_action( 'wp_head', 'cache_manager_timestamp', 0 );
