@@ -22,11 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
-$plugin_root = __DIR__;
+$autoload = __DIR__ . '/vendor/autoload.php';
 
-if ( file_exists( $plugin_root . '/vendor/autoload.php' ) ) {
-	require_once $plugin_root . '/vendor/autoload.php';
+if ( file_exists( $autoload ) ) {
+	require_once $autoload;
 }
+
+unset( $autoload );
 
 /**
  * Initializes the plugin on the init hook. We are hooking in late to ensure
