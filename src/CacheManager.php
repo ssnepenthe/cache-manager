@@ -27,6 +27,10 @@ class CacheManager {
 	}
 
 	/**
+	 * @hook
+	 *
+	 * @priority 99
+	 *
 	 * @todo FastCGIFileSystem will throw an exception if the provided dir is
 	 *       not writable. Instead of failing silently, add a dismissable admin
 	 *       notice notifying the user that the fs cache is not active.
@@ -96,18 +100,14 @@ class CacheManager {
 		] );
 
 		$toolbar->init();
-
-		add_action( 'admin_enqueue_scripts', [ $this, 'toolbar_styles' ] );
-		add_action( 'wp_enqueue_scripts', [ $this, 'toolbar_styles' ] );
-
-		add_action(
-			'transition_post_status',
-			[ $this, 'transition_post_status' ],
-			10,
-			3
-		);
 	}
 
+	/**
+	 * @hook
+	 *
+	 * @tag admin_enqueue_scripts
+	 * @tag wp_enqueue_scripts
+	 */
 	public function toolbar_styles() {
 		if ( ! is_admin_bar_showing() && ! is_admin() ) {
 			return;
@@ -177,6 +177,9 @@ class CacheManager {
 		return $path;
 	}
 
+	/**
+	 * @hook
+	 */
 	public function transition_post_status( $new_status, $old_status, $post ) {
 		if ( 'publish' !== $old_status && 'private' !== $old_status ) {
 			return;

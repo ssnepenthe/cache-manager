@@ -38,8 +38,7 @@ function cache_manager_init() {
 		return;
 	}
 
-	$manager = new SSNepenthe\CacheManager\CacheManager;
-	$manager->init();
+	SSNepenthe\Metis\Loader::attach( new SSNepenthe\CacheManager\CacheManager );
 }
 add_action( 'init', 'cache_manager_init', 99 );
 
