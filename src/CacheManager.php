@@ -8,6 +8,7 @@ namespace SSNepenthe\CacheManager;
 use SSNepenthe\CacheManager\MultiCache;
 use SSNepenthe\CacheManager\Nginx\FastCGIHTTP;
 use SSNepenthe\CacheManager\Nginx\FastCGIFileSystem;
+use SSNepenthe\Metis\Loader
 use SSNepenthe\Metis\Toolbar;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -99,7 +100,7 @@ class CacheManager {
 			],
 		] );
 
-		$toolbar->init();
+		Loader::attach( $toolbar );
 	}
 
 	/**
