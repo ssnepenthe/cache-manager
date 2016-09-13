@@ -31,9 +31,7 @@ if ( file_exists( $autoload ) ) {
 unset( $autoload );
 
 /**
- * Initializes the plugin on the init hook. We are hooking in late to ensure
- * CPTs with custom rewrites have been registered so that get_permalink() works
- * as it is supposed to.
+ * Initializes the plugin on the init hook.
  */
 function cache_manager_init() {
 	if ( ! is_admin() && ! is_admin_bar_showing() ) {
@@ -42,7 +40,7 @@ function cache_manager_init() {
 
 	SSNepenthe\Metis\Loader::attach( new SSNepenthe\CacheManager\CacheManager );
 }
-add_action( 'init', 'cache_manager_init', 99 );
+add_action( 'init', 'cache_manager_init', 1 );
 
 /**
  * Outputs a cache timestamp in wp_head.
