@@ -1,11 +1,11 @@
 <?php
 
-namespace SSNepenthe\CacheManager\Interfaces;
+namespace SSNepenthe\Cache_Manager\Interfaces;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
-interface RefreshableCache {
+interface Refreshable_Cache {
 	public function refresh( $url );
 }

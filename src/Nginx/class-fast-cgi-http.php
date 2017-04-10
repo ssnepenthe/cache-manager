@@ -3,16 +3,16 @@
  * @package cache-manager
  */
 
-namespace SSNepenthe\CacheManager\Nginx;
+namespace SSNepenthe\Cache_Manager\Nginx;
 
-use SSNepenthe\CacheManager\Interfaces\CreatableCache;
-use SSNepenthe\CacheManager\Interfaces\RefreshableCache;
+use SSNepenthe\Cache_Manager\Interfaces\Creatable_Cache;
+use SSNepenthe\Cache_Manager\Interfaces\Refreshable_Cache;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
-class FastCGIHTTP implements CreatableCache, RefreshableCache {
+class Fast_CGI_HTTP implements Creatable_Cache, Refreshable_Cache {
 	public function create( $url ) {
 		if ( ! is_string( $url ) ) {
 			throw new \InvalidArgumentException( sprintf(

@@ -1,10 +1,10 @@
 <?php
 
-namespace SSNepenthe\CacheManager;
+namespace SSNepenthe\Cache_Manager;
 
-use SSNepenthe\CacheManager\Cache;
-use SSNepenthe\CacheManager\Interfaces\CreatableCache;
-use SSNepenthe\CacheManager\Interfaces\RefreshableCache;
+use SSNepenthe\Cache_Manager\Cache;
+use SSNepenthe\Cache_Manager\Interfaces\Creatable_Cache;
+use SSNepenthe\Cache_Manager\Interfaces\Refreshable_Cache;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * @todo Exists method?
  */
-class MultiCache {
+class Multi_Cache {
 	protected $has = [
 		'creatable' => false,
 		'refreshable' => false,
@@ -24,11 +24,11 @@ class MultiCache {
 		if ( ! in_array( $provider, $this->providers ) ) {
 			$this->providers[] = $provider;
 
-			if ( $provider instanceof CreatableCache ) {
+			if ( $provider instanceof Creatable_Cache ) {
 				$this->has['creatable'] = true;
 			}
 
-			if ( $provider instanceof RefreshableCache ) {
+			if ( $provider instanceof Refreshable_Cache ) {
 				$this->has['refreshable'] = true;
 			}
 
@@ -53,7 +53,7 @@ class MultiCache {
 		}
 
 		foreach ( $this->providers as $provider ) {
-			if ( $provider instanceof CreatableCache ) {
+			if ( $provider instanceof Creatable_Cache ) {
 				$success = $provider->create( $url ) || $success;
 			}
 		}
@@ -84,7 +84,7 @@ class MultiCache {
 		}
 
 		foreach ( $this->providers as $provider ) {
-			if ( $provider instanceof RefreshableCache ) {
+			if ( $provider instanceof Refreshable_Cache ) {
 				$success = $provider->refresh( $url ) || $success;
 			}
 		}

@@ -1,6 +1,6 @@
 <?php
 
-namespace SSNepenthe\CacheManager;
+namespace SSNepenthe\Cache_Manager;
 
 class Toolbar {
 	protected $defaults;
@@ -15,8 +15,6 @@ class Toolbar {
 			'meta'       => [],
 			'parent'     => false,
 			'title'      => false,
-
-			// Some extras.
 
 			// Callback to fire when the link is clicked.
 			'action_cb'  => '__return_true',
@@ -69,11 +67,6 @@ class Toolbar {
 		}
 	}
 
-	/**
-	 * @hook
-	 *
-	 * @priority 999
-	 */
 	public function admin_bar_menu( \WP_Admin_Bar $wp_admin_bar ) {
 		if ( empty( $this->nodes ) ) {
 			return;
@@ -86,11 +79,6 @@ class Toolbar {
 		}
 	}
 
-	/**
-	 * @hook
-	 *
-	 * @priority 999
-	 */
 	public function admin_init() {
 		if ( empty( $this->nodes ) ) {
 			return;

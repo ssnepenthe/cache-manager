@@ -48,7 +48,7 @@ function cache_manager_init() {
 		return;
 	}
 
-	$cm_plugin = new SSNepenthe\CacheManager\CacheManager;
+	$cm_plugin = new SSNepenthe\Cache_Manager\Cache_Manager;
 
 	add_action( 'init', array( $cm_plugin, 'init' ), 99 );
 	add_action(

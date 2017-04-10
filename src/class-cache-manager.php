@@ -3,22 +3,22 @@
  * @package cache-manager
  */
 
-namespace SSNepenthe\CacheManager;
+namespace SSNepenthe\Cache_Manager;
 
-use SSNepenthe\CacheManager\Toolbar;
-use SSNepenthe\CacheManager\MultiCache;
-use SSNepenthe\CacheManager\Nginx\FastCGIHTTP;
+use SSNepenthe\Cache_Manager\Toolbar;
+use SSNepenthe\Cache_Manager\Multi_Cache;
+use SSNepenthe\Cache_Manager\Nginx\Fast_CGI_HTTP;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
-class CacheManager {
+class Cache_Manager {
 	protected $multi_cache;
 	protected $path = null;
 
 	public function __construct() {
-		$this->multi_cache = new MultiCache;
+		$this->multi_cache = new Multi_Cache;
 	}
 
 	/**
@@ -31,7 +31,7 @@ class CacheManager {
 	 *       notice notifying the user that the fs cache is not active.
 	 */
 	public function init() {
-		$this->multi_cache->add_provider( new FastCGIHTTP );
+		$this->multi_cache->add_provider( new Fast_CGI_HTTP );
 
 		$path = $this->get_path();
 		$icon = '';

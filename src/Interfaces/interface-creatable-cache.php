@@ -1,11 +1,11 @@
 <?php
 
-namespace SSNepenthe\CacheManager\Interfaces;
+namespace SSNepenthe\Cache_Manager\Interfaces;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
-interface CreatableCache {
+interface Creatable_Cache {
 	public function create( $url );
 }
