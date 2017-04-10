@@ -22,13 +22,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
-$autoload = __DIR__ . '/vendor/autoload.php';
-
-if ( file_exists( $autoload ) ) {
-	require_once $autoload;
+function _cm_require_if_exists( $file ) {
+	if ( file_exists( $file ) ) {
+		require_once $file;
+	}
 }
 
-unset( $autoload );
+_cm_require_if_exists( __DIR__ . '/vendor/autoload.php' );
+
+$cm_checker = new WP_Requirements\Plugin_Checker( 'Cache Manager', __FILE__ );
+$cm_checker->php_at_least( '5.4' );
+
+if ( $cm_checker->requirements_met() ) {
+	add_action( 'init', 'cache_manager_init', 1 );
+	add_action( 'wp_head', 'cache_manager_timestamp', 0 );
+} else {
+	$cm_checker->deactivate_and_notify();
+}
 
 /**
  * Initializes the plugin on the init hook.
@@ -40,12 +50,14 @@ function cache_manager_init() {
 
 	$cm_plugin = new SSNepenthe\CacheManager\CacheManager;
 
-	add_action( 'init', [ $cm_plugin, 'init' ], 99 );
-	add_action( 'admin_enqueue_scripts', [ $cm_plugin, 'toolbar_styles' ] );
-	add_action( 'wp_enqueue_scripts', [ $cm_plugin, 'toolbar_styles' ] );
-	add_action( 'transition_post_status', [ $cm_plugin, 'transition_post_status' ] );
+	add_action( 'init', array( $cm_plugin, 'init' ), 99 );
+	add_action( 'admin_enqueue_scripts', array( $cm_plugin, 'toolbar_styles' ) );
+	add_action( 'wp_enqueue_scripts', array( $cm_plugin, 'toolbar_styles' ) );
+	add_action(
+		'transition_post_status',
+		array( $cm_plugin, 'transition_post_status' )
+	);
 }
-add_action( 'init', 'cache_manager_init', 1 );
 
 /**
  * Outputs a cache timestamp in wp_head.
@@ -53,4 +65,3 @@ add_action( 'init', 'cache_manager_init', 1 );
 function cache_manager_timestamp() {
 	include_once plugin_dir_path( __FILE__ ) . 'partials/timestamp.php';
 }
-add_action( 'wp_head', 'cache_manager_timestamp', 0 );

@@ -1,17 +1,18 @@
 {
-    "name": "ssnepenthe/cache-manager",
-    "description": "A WordPress mu-plugin for managing Nginx fastcgi cache.",
-    "type": "wordpress-plugin",
-    "homepage": "https://github.com/ssnepenthe/cache-manager",
-    "license": "GPL-2.0",
-    "require": {
-        "php": ">=5.4",
-        "composer/installers": "^1.0"
-    },
-    "require-dev": {
-        "psy/psysh": "^0.8"
-    },
-    "autoload": {
-    	"psr-4": { "SSNepenthe\\CacheManager\\": "src/" }
-    }
+  "name": "ssnepenthe/cache-manager",
+  "description": "A WordPress mu-plugin for managing Nginx fastcgi cache.",
+  "type": "wordpress-plugin",
+  "homepage": "https://github.com/ssnepenthe/cache-manager",
+  "license": "GPL-2.0",
+  "require": {
+    "php": ">=5.4",
+    "composer/installers": "^1.0",
+    "ssnepenthe/wp-requirements": "dev-master"
+  },
+  "require-dev": {
+    "psy/psysh": "^0.8"
+  },
+  "autoload": {
+    "psr-4": { "SSNepenthe\\CacheManager\\": "src/" }
+  }
 }
