@@ -38,7 +38,12 @@ function cache_manager_init() {
 		return;
 	}
 
-	SSNepenthe\Metis\Loader::attach( new SSNepenthe\CacheManager\CacheManager );
+	$cm_plugin = new SSNepenthe\CacheManager\CacheManager;
+
+	add_action( 'init', [ $cm_plugin, 'init' ], 99 );
+	add_action( 'admin_enqueue_scripts', [ $cm_plugin, 'toolbar_styles' ] );
+	add_action( 'wp_enqueue_scripts', [ $cm_plugin, 'toolbar_styles' ] );
+	add_action( 'transition_post_status', [ $cm_plugin, 'transition_post_status' ] );
 }
 add_action( 'init', 'cache_manager_init', 1 );
 

@@ -5,11 +5,10 @@
 
 namespace SSNepenthe\CacheManager;
 
+use SSNepenthe\CacheManager\Toolbar;
 use SSNepenthe\CacheManager\MultiCache;
 use SSNepenthe\CacheManager\Nginx\FastCGIHTTP;
 use SSNepenthe\CacheManager\Nginx\FastCGIFileSystem;
-use SSNepenthe\Metis\Loader;
-use SSNepenthe\Metis\Toolbar;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
@@ -100,7 +99,8 @@ class CacheManager {
 			],
 		] );
 
-		Loader::attach( $toolbar );
+		add_action( 'admin_bar_menu', [ $toolbar, 'admin_bar_menu' ], 999 );
+		add_action( 'admin_init', [ $toolbar, 'admin_init' ], 999 );
 	}
 
 	/**
