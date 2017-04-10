@@ -51,8 +51,6 @@ function cache_manager_init() {
 	$cm_plugin = new SSNepenthe\CacheManager\CacheManager;
 
 	add_action( 'init', array( $cm_plugin, 'init' ), 99 );
-	add_action( 'admin_enqueue_scripts', array( $cm_plugin, 'toolbar_styles' ) );
-	add_action( 'wp_enqueue_scripts', array( $cm_plugin, 'toolbar_styles' ) );
 	add_action(
 		'transition_post_status',
 		array( $cm_plugin, 'transition_post_status' )

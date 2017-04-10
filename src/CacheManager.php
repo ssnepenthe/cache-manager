@@ -8,7 +8,6 @@ namespace SSNepenthe\CacheManager;
 use SSNepenthe\CacheManager\Toolbar;
 use SSNepenthe\CacheManager\MultiCache;
 use SSNepenthe\CacheManager\Nginx\FastCGIHTTP;
-use SSNepenthe\CacheManager\Nginx\FastCGIFileSystem;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	die;
@@ -19,10 +18,6 @@ class CacheManager {
 	protected $path = null;
 
 	public function __construct() {
-		if ( ! defined( 'CM_CACHE_DIR' ) ) {
-			define( 'CM_CACHE_DIR', '/var/cache/nginx' );
-		}
-
 		$this->multi_cache = new MultiCache;
 	}
 
@@ -38,28 +33,8 @@ class CacheManager {
 	public function init() {
 		$this->multi_cache->add_provider( new FastCGIHTTP );
 
-		try {
-			$this->multi_cache->add_provider(
-				new FastCGIFileSystem( CM_CACHE_DIR )
-			);
-		} catch ( \Exception $e ) {
-			// Cache dir not writable. Fail silently.
-		}
-
 		$path = $this->get_path();
 		$icon = '';
-
-		if ( $this->multi_cache->has_checkable() ) {
-			$classes = [ 'cm-icon' ];
-			$classes[] = $this->multi_cache->exists( home_url( $path ) ) ?
-				'cm-exists' :
-				'cm-does-not-exist';
-
-			$icon = sprintf(
-				'<div class="%s"></div>',
-				implode( ' ', $classes )
-			);
-		}
 
 		$toolbar = new Toolbar;
 
@@ -78,19 +53,6 @@ class CacheManager {
 				'title' => 'Create Cache',
 			],
 			[
-				'action_cb' => [ $this, 'delete_action' ],
-				'display_cb' => [ $this, 'delete_display' ],
-				'id' => 'cm-delete-cache',
-				'query_args' => [ 'path' => $path ],
-				'title' => 'Delete Cache',
-			],
-			[
-				'id' => 'cm-flush-cache',
-				'title' => 'Flush Cache',
-				'action_cb' => [ $this, 'flush_action' ],
-				'display_cb' => [ $this, 'flush_display' ],
-			],
-			[
 				'action_cb' => [ $this, 'refresh_action' ],
 				'display_cb' => [ $this, 'refresh_display' ],
 				'id' => 'cm-refresh-cache',
@@ -101,30 +63,6 @@ class CacheManager {
 
 		add_action( 'admin_bar_menu', [ $toolbar, 'admin_bar_menu' ], 999 );
 		add_action( 'admin_init', [ $toolbar, 'admin_init' ], 999 );
-	}
-
-	/**
-	 * @hook
-	 *
-	 * @tag admin_enqueue_scripts
-	 * @tag wp_enqueue_scripts
-	 */
-	public function toolbar_styles() {
-		if ( ! is_admin_bar_showing() && ! is_admin() ) {
-			return;
-		}
-
-		if ( ! $this->multi_cache->has_checkable() ) {
-			return;
-		}
-
-		if ( ! $this->parent_display() ) {
-			return;
-		}
-
-		$data = '#wpadminbar .cm-icon{border-radius:50%;display:inline-block;float:left;height:12px;margin-right:6px;margin-top:10px;width:12px;}.cm-icon.cm-exists{background:#0a0;}.cm-icon.cm-does-not-exist{background:#a00;}';
-
-		wp_add_inline_style( 'admin-bar', $data );
 	}
 
 	public function get_path() {
@@ -211,44 +149,6 @@ class CacheManager {
 
 	public function create_display() {
 		if ( ! $this->multi_cache->has_creatable() || ! $this->get_path() ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public function delete_action() {
-		if ( ! $this->multi_cache->has_deletable() ) {
-			return;
-		}
-
-		$path = filter_input( INPUT_GET, 'path', FILTER_SANITIZE_URL );
-
-		if ( ! $path ) {
-			return;
-		}
-
-		$this->multi_cache->delete( home_url( $path ) );
-	}
-
-	public function delete_display() {
-		if ( ! $this->multi_cache->has_deletable() || ! $this->get_path() ) {
-			return false;
-		}
-
-		return true;
-	}
-
-	public function flush_action() {
-		if ( ! $this->multi_cache->has_flushable() ) {
-			return;
-		}
-
-		$this->multi_cache->flush();
-	}
-
-	public function flush_display() {
-		if ( ! $this->multi_cache->has_flushable() || ! $this->get_path() ) {
 			return false;
 		}
 
