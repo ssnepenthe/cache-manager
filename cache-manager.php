@@ -22,6 +22,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	die;
 }
 
+/**
+ * Require a given file once if it exists.
+ *
+ * @param  string $file File to check existence of and require.
+ *
+ * @return void
+ */
 function _cm_require_if_exists( $file ) {
 	if ( file_exists( $file ) ) {
 		require_once $file;

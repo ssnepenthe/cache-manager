@@ -1,5 +1,15 @@
 <?php
+/**
+ * Debugging helper functions.
+ *
+ * @package cache-manager
+ */
 
+/**
+ * Determine whether debug mode is enabled.
+ *
+ * @return bool
+ */
 function debug_enabled() {
 	return defined( 'CACHE_MANAGER_DEBUG' )
 		&& CACHE_MANAGER_DEBUG
@@ -7,6 +17,14 @@ function debug_enabled() {
 		&& WP_DEBUG;
 }
 
+/**
+ * Print a debugging notice in admin_notices if debug mode is enabled.
+ *
+ * @param  string $message  Message to display to the user.
+ * @param  string $severity Message severity used to apply proper CSS styling.
+ *
+ * @return void
+ */
 function debug_notice( $message, $severity = 'info' ) {
 	if ( ! debug_enabled() ) {
 		return;
@@ -17,19 +35,24 @@ function debug_notice( $message, $severity = 'info' ) {
 	}
 
 	add_action( 'admin_notices', function() use ( $severity, $message ) {
-		$template = [
-			sprintf(
-				'<div class="notice notice-%s is-dismissible">',
-				esc_attr( $severity )
-			),
-			sprintf( '<p>Cache Manager: %s</p>', esc_html( $message ) ),
-			'</div>',
-		];
+		printf(
+			'<div class="notice notice-%s is-dismissible">',
+			esc_attr( $severity )
+		);
 
-		echo implode( '', $template );
+		printf( '<p>Cache Manager: %s</p>', esc_html( $message ) );
+
+		echo '</div>';
 	} );
 }
 
+/**
+ * Print a debugging notice of severity "warning".
+ *
+ * @param  string $message Message to display to the user.
+ *
+ * @return void
+ */
 function debug_warning( $message ) {
 	debug_notice( $message, 'warning' );
 }

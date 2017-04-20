@@ -1,9 +1,21 @@
 <?php
+/**
+ * The primary functions that make up the Cache Manager plugin.
+ *
+ * @package cache-manager
+ */
 
 namespace Cache_Manager;
 
 use WP_Admin_Bar;
 
+/**
+ * Add cache manager nodes to the admin bar.
+ *
+ * @param  WP_Admin_Bar $wp_admin_bar WP admin bar instance.
+ *
+ * @return void
+ */
 function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
 	if ( ! should_display_menu() ) {
 		debug_warning( 'Menu should not be displayed on this page' );
@@ -20,7 +32,7 @@ function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
 		'href' => wp_nonce_url(
 			add_query_arg(
 				'path',
-				urlencode( get_current_cache_path() ),
+				rawurlencode( get_current_cache_path() ),
 				admin_url( 'index.php?action=cm-create' )
 			),
 			'cache_manager_create'
@@ -34,7 +46,7 @@ function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
 		'href' => wp_nonce_url(
 			add_query_arg(
 				'path',
-				urlencode( get_current_cache_path() ),
+				rawurlencode( get_current_cache_path() ),
 				admin_url( 'index.php?action=cm-refresh' )
 			),
 			'cache_manager_refresh'
@@ -45,6 +57,11 @@ function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
 	] );
 }
 
+/**
+ * Callback for creating a cache entry.
+ *
+ * @return void
+ */
 function create_handler() {
 	$path = get_current_cache_path();
 
@@ -63,6 +80,11 @@ function create_handler() {
 	wp_safe_remote_get( $path, $args );
 }
 
+/**
+ * Determine the cache URL represented by the current request.
+ *
+ * @return boolean|string
+ */
 function get_current_cache_path() {
 	// @todo Automatically return false on non frontend pages like wp-api, wp-login?
 	$path = filter_input( INPUT_GET, 'path', FILTER_SANITIZE_URL );
@@ -75,12 +97,17 @@ function get_current_cache_path() {
 		return get_current_cache_path_from_admin();
 	}
 
-	// https://secure.php.net/manual/en/function.filter-input.php#77307
+	// https://secure.php.net/manual/en/function.filter-input.php#77307.
 	$request_uri = filter_var( $_SERVER['REQUEST_URI'], FILTER_SANITIZE_URL );
 
 	return home_url( $request_uri );
 }
 
+/**
+ * Determine the cache URL represented by the current admin request.
+ *
+ * @return boolean|string
+ */
 function get_current_cache_path_from_admin() {
 	global $pagenow;
 
@@ -104,6 +131,11 @@ function get_current_cache_path_from_admin() {
 	return get_permalink( $post_object );
 }
 
+/**
+ * Verifies permission and intention and then calls action-specific callback.
+ *
+ * @return void
+ */
 function handle_cache_manager_action() {
 	global $pagenow;
 
@@ -150,16 +182,31 @@ function handle_cache_manager_action() {
 	die;
 }
 
+/**
+ * Initizlizes the plugin by hooking primary functions in to WordPress.
+ *
+ * @return void
+ */
 function initialize() {
 	add_action( 'admin_init', __NAMESPACE__ . '\\handle_cache_manager_action' );
 	add_action( 'wp_head', __NAMESPACE__ . '\\print_timestamp', 0 );
 	add_action( 'admin_bar_menu', __NAMESPACE__ . '\\admin_bar_menu', 99 );
 }
 
+/**
+ * Loads the timestamp template.
+ *
+ * @return void
+ */
 function print_timestamp() {
 	include_once plugin_dir_path( __DIR__ ) . 'partials/timestamp.php';
 }
 
+/**
+ * Callback for refreshing a cache entry.
+ *
+ * @return void
+ */
 function refresh_handler() {
 	$path = get_current_cache_path();
 
@@ -173,7 +220,9 @@ function refresh_handler() {
 		'blocking' => false,
 		'headers'  => (array) apply_filters(
 			'cache_manager_refresh_headers',
-			[ 'X-Nginx-Cache-Purge' => '1' ]
+			[
+				'X-Nginx-Cache-Purge' => '1',
+			]
 		),
 		'sslverify' => apply_filters( 'cache_manager_sslverify', true ),
 		'timeout'  => 1, // WP_Http won't go any lower.
@@ -182,6 +231,11 @@ function refresh_handler() {
 	wp_safe_remote_get( $path, $args );
 }
 
+/**
+ * Determine whether the cache menu should be displayed.
+ *
+ * @return bool
+ */
 function should_display_menu() {
 	return current_user_can( 'manage_options' ) && (bool) get_current_cache_path();
 }
