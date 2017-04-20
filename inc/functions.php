@@ -84,7 +84,7 @@ function get_current_cache_path() {
 function get_current_cache_path_from_admin() {
 	global $pagenow;
 
-	if ( 'post.php' !== $pagenow ) {
+	if ( ! is_admin() || 'post.php' !== $pagenow ) {
 		return false;
 	}
 
@@ -106,6 +106,11 @@ function get_current_cache_path_from_admin() {
 
 function handle_cache_manager_action() {
 	global $pagenow;
+
+	if ( ! is_admin() ) {
+		// This is only hooked to admin init, but just to be safe...
+		return;
+	}
 
 	if ( 'index.php' !== $pagenow || ! should_display_menu() ) {
 		debug_warning( 'Actions should not be handled on this page' );
