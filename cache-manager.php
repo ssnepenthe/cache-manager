@@ -35,9 +35,9 @@ function _cm_require_if_exists( $file ) {
 	}
 }
 
-_cm_require_if_exists( __DIR__ . '/vendor/autoload.php' );
-
 $cm_dir = plugin_dir_path( __FILE__ );
+
+_cm_require_if_exists( $cm_dir . 'vendor/autoload.php' );
 
 $cm_checker = new WP_Requirements\Plugin_Checker( 'Cache Manager', __FILE__ );
 $cm_checker->php_at_least( '5.4' );
