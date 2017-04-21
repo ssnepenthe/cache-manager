@@ -1,6 +1,6 @@
 <?php
 /**
- * A WordPress mu-plugin for managing Nginx fastcgi cache.
+ * A WordPress plugin for managing Nginx fastcgi cache.
  *
  * @package cache-manager
  */
@@ -8,7 +8,7 @@
 /**
  * Plugin Name: Cache Manager
  * Plugin URI: https://github.com/ssnepenthe/cache-manager
- * Description: A WordPress mu-plugin for managing Nginx fastcgi cache.
+ * Description: A WordPress plugin for managing Nginx fastcgi cache.
  * Version: 0.3.0
  * Author: Ryan McLaughlin
  * Author URI: https://github.com/ssnepenthe
