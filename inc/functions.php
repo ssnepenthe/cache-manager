@@ -187,6 +187,12 @@ function initialize() {
 	add_action( 'admin_init', __NAMESPACE__ . '\\handle_cache_manager_action' );
 	add_action( 'wp_head', __NAMESPACE__ . '\\print_timestamp', 0 );
 	add_action( 'admin_bar_menu', __NAMESPACE__ . '\\admin_bar_menu', 99 );
+	add_action(
+		'transition_post_status',
+		__NAMESPACE__ . '\\transition_post_status',
+		10,
+		3
+	);
 }
 
 /**
@@ -230,4 +236,23 @@ function refresh_handler( $url ) {
  */
 function should_display_menu() {
 	return current_user_can( 'manage_options' ) && (bool) get_current_cache_path();
+}
+
+/**
+ * Refresh the page cache when a post is updated.
+ *
+ * @param  string  $_          Unused - New post status
+ * @param  string  $old_status Old post status.
+ * @param  WP_Post $post       The post that was updated.
+ *
+ * @return void
+ */
+function transition_post_status( $_, $old_status, $post ) {
+	if ( 'publish' !== $old_status && 'private' !== $old_status ) {
+		return;
+	}
+
+	$url = get_permalink( $post );
+
+	refresh_handler( $url );
 }
