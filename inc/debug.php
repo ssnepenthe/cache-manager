@@ -5,6 +5,10 @@
  * @package cache-manager
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
+
 /**
  * Determine whether debug mode is enabled.
  *

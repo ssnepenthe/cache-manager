@@ -9,6 +9,10 @@ namespace Cache_Manager;
 
 use WP_Admin_Bar;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	die;
+}
+
 /**
  * Add cache manager nodes to the admin bar.
  *
