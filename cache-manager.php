@@ -9,8 +9,8 @@
  * Plugin Name: Cache Manager
  * Plugin URI: https://github.com/ssnepenthe/cache-manager
  * Description: A WordPress mu-plugin for managing Nginx fastcgi cache.
- * Version: 0.2.3
- * Author: SSNepenthe
+ * Version: 0.3.0
+ * Author: Ryan McLaughlin
  * Author URI: https://github.com/ssnepenthe
  * License: GPL-2.0
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
