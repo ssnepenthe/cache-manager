@@ -62,12 +62,8 @@ function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
  *
  * @return void
  */
-function create_handler() {
-	$path = get_current_cache_path();
-
-	if ( ! $path ) {
-		debug_warning( 'No path set in create handler' );
-
+function create_handler( $url ) {
+	if ( ! $url || ! is_string( $url ) ) {
 		return;
 	}
 
@@ -77,7 +73,7 @@ function create_handler() {
 		'timeout'  => 1, // WP_Http won't go any lower.
 	];
 
-	wp_safe_remote_get( $path, $args );
+	wp_safe_remote_get( $url, $args );
 }
 
 /**
@@ -176,7 +172,7 @@ function handle_cache_manager_action() {
 
 	$handler = __NAMESPACE__ . "\\{$id}_handler";
 
-	$handler();
+	$handler( get_current_cache_path() );
 
 	wp_safe_redirect( wp_get_referer() );
 	die;
@@ -207,12 +203,8 @@ function print_timestamp() {
  *
  * @return void
  */
-function refresh_handler() {
-	$path = get_current_cache_path();
-
-	if ( ! $path ) {
-		debug_warning( 'No path set in refresh handler' );
-
+function refresh_handler( $url ) {
+	if ( ! $url || ! is_string( $url ) ) {
 		return;
 	}
 
@@ -228,7 +220,7 @@ function refresh_handler() {
 		'timeout'  => 1, // WP_Http won't go any lower.
 	];
 
-	wp_safe_remote_get( $path, $args );
+	wp_safe_remote_get( $url, $args );
 }
 
 /**
