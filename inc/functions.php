@@ -64,6 +64,8 @@ function admin_bar_menu( WP_Admin_Bar $wp_admin_bar ) {
 /**
  * Callback for creating a cache entry.
  *
+ * @param  string $url The URL to create a cache entry for.
+ *
  * @return void
  */
 function create_handler( $url ) {
@@ -211,6 +213,8 @@ function print_timestamp() {
 /**
  * Callback for refreshing a cache entry.
  *
+ * @param  string $url The URL for which you want to refresh the cache.
+ *
  * @return void
  */
 function refresh_handler( $url ) {
@@ -245,7 +249,7 @@ function should_display_menu() {
 /**
  * Refresh the page cache when a post is updated.
  *
- * @param  string  $_          Unused - New post status
+ * @param  string  $_          Unused - New post status.
  * @param  string  $old_status Old post status.
  * @param  WP_Post $post       The post that was updated.
  *
