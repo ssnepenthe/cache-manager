@@ -1,6 +1,6 @@
 {
   "name": "ssnepenthe/cache-manager",
-  "description": "A WordPress mu-plugin for managing Nginx fastcgi cache.",
+  "description": "A WordPress plugin for managing Nginx fastcgi cache.",
   "type": "wordpress-plugin",
   "homepage": "https://github.com/ssnepenthe/cache-manager",
   "license": "GPL-2.0",
